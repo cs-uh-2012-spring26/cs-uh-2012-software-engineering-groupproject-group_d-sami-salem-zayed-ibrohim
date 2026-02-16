@@ -11,3 +11,4 @@ Flask-APScheduler==1.13.1
 boto3==1.39.8
 flask_cors==6.0.1
 python-dateutil==2.9.0
+flask_jwt_extended==4.7.1

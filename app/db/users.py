@@ -40,7 +40,8 @@ class UserResource:
     def get_user_by_email(self, email: str):
         """Get user by email"""
         user = self.collection.find_one({EMAIL: email})
-        user.pop(PASSWORD, None)  # Remove password from returned data (security)
+        if user and PASSWORD in user:
+            user.pop(PASSWORD, None)  # Remove password from returned data (security)
         return serialize_item(user)
 
     def verify_password(self, email: str, password: str):
