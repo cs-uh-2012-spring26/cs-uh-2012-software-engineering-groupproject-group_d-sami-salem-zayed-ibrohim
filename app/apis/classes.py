@@ -62,7 +62,7 @@ class Classes(Resource):
         description = data.get(DESCRIPTION)
 
         # Validate required fields
-        if not all([title, start_date_str, end_date_str, capacity, location, description]):
+        if not all([title, start_date_str, end_date_str, capacity is not None, location, description]):
             return {"message": "All fields are required: title, start_date, end_date, capacity, location, description"}, HTTPStatus.BAD_REQUEST
 
         # Validate capacity
