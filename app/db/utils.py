@@ -1,4 +1,5 @@
 from app.db.constants import ID
+from datetime import datetime
 
 
 def serialize_oid(oid):
@@ -16,16 +17,20 @@ def serialize_oid(oid):
 
 def serialize_item(item):
     """
-    Serializes the given item by converting its ID field to a serialized object ID.
+    Serializes the given item by converting its ID field to a serialized object ID
+    and datetime fields to ISO format strings.
 
     Args:
         item (dict): The item to be serialized. It must contain an 'ID' field.
 
     Returns:
-        dict: The serialized item with the 'ID' field converted.
+        dict: The serialized item with non-JSON-serializable fields converted.
     """
     if item is not None:
         item[ID] = serialize_oid(item[ID])
+        for key, value in item.items():
+            if isinstance(value, datetime):
+                item[key] = value.strftime("%Y-%m-%d %H:%M:%S")
     return item
 
 
