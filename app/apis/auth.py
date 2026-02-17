@@ -57,7 +57,7 @@ class Register(Resource):
 
         # Create user
         try:
-            user_id = user_resource.create_user(email, password, name, role)
+            user_id = user_resource.create_user(email, password, name, birthday, role)
         except Exception as e:
             # Handle duplicate key error from MongoDB unique index
             if "duplicate key" in str(e).lower() or "E11000" in str(e):
