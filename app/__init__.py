@@ -1,5 +1,6 @@
 from app.apis.auth import api as auth_ns
 from app.apis.classes import api as class_ns
+from app.apis.booking import api as booking_ns
 from app.config import Config
 from app.db import DB
 
@@ -37,6 +38,7 @@ def create_app():
     api.init_app(app)
     api.add_namespace(auth_ns)
     api.add_namespace(class_ns)
+    api.add_namespace(booking_ns)
 
     @api.errorhandler(NoAuthorizationError)
     def handle_no_auth(error):
