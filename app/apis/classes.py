@@ -2,8 +2,9 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from http import HTTPStatus
-from app.db.classes import ClassResource, TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION
+from app.db.classes import ClassResource, TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION, TRAINER_ID
 from app.db.users import UserResource, ROLE_TRAINER, NAME
+from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME
 from datetime import datetime
 
 api = Namespace("classes", description="Class management endpoints")
@@ -29,6 +30,12 @@ class_response = api.model("ClassResponse", {
     LOCATION: fields.String(description="Class location"),
     DESCRIPTION: fields.String(description="Class description"),
     "created_at": fields.String(description="Creation timestamp")
+})
+
+member_response = api.model("MemberResponse", {
+    USER_NAME: fields.String(description="Member name"),
+    USER_EMAIL: fields.String(description="Member email"),
+    BOOKING_TIME: fields.String(description="Booking timestamp")
 })
 
 
@@ -116,3 +123,55 @@ class Classes(Resource):
         created_class = class_resource.get_class_by_id(str(class_id))
         
         return created_class, HTTPStatus.CREATED
+
+
+@api.route("/<string:class_id>/members")
+class ClassMembers(Resource):
+    @api.response(HTTPStatus.OK, "Class members retrieved successfully", [member_response])
+    @api.response(HTTPStatus.NOT_FOUND, "Class not found")
+    @api.response(HTTPStatus.UNAUTHORIZED, "Unauthorized - Trainer role required or not the class trainer")
+    @api.doc(security='Bearer')
+    @jwt_required()
+    def get(self, class_id):
+        """Get members who booked a class (trainer of the class only)"""
+        # Get JWT claims
+        claims = get_jwt()
+        role = claims.get("role")
+        user_id = claims.get("user_id")
+
+        # Check if user is a trainer
+        if role != ROLE_TRAINER:
+            return {"message": "Only trainers can view class members"}, HTTPStatus.UNAUTHORIZED
+
+        # Validate user_id from JWT
+        if not user_id:
+            return {"message": "Invalid token: user_id not found"}, HTTPStatus.UNAUTHORIZED
+
+        # Get class by ID
+        class_resource = ClassResource()
+        fitness_class = class_resource.get_class_by_id(class_id)
+
+        if not fitness_class:
+            return {"message": "Class not found"}, HTTPStatus.NOT_FOUND
+
+        # Check if the trainer trains this class
+        class_trainer_id = fitness_class.get(TRAINER_ID)
+        if class_trainer_id != user_id:
+            return {"message": "You are not authorized to view members of this class"}, HTTPStatus.UNAUTHORIZED
+
+        # Get bookings for this class
+        booking_resource = BookingResource()
+        bookings = booking_resource.get_bookings_by_class(class_id)
+
+        # Format response with only required fields
+        members = []
+        for booking in bookings:
+            # Skip trainer bookings if any
+            if not booking.get("is_trainer", False):
+                members.append({
+                    USER_NAME: booking.get(USER_NAME),
+                    USER_EMAIL: booking.get(USER_EMAIL),
+                    BOOKING_TIME: booking.get(BOOKING_TIME)
+                })
+
+        return members, HTTPStatus.OK
