@@ -4,7 +4,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from http import HTTPStatus
 from app.db.classes import ClassResource, TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION, TRAINER_ID
 from app.db.users import UserResource, ROLE_TRAINER, NAME
-from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME
+from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME, CLASS_ID
 from datetime import datetime
 
 api = Namespace("classes", description="Class management endpoints")
@@ -123,6 +123,52 @@ class Classes(Resource):
         created_class = class_resource.get_class_by_id(str(class_id))
         
         return created_class, HTTPStatus.CREATED
+
+
+    # Implementing Feature 2
+    @api.response(HTTPStatus.OK, "Upcoming classes retrieved successfully", [class_response])
+    def get(self):
+        """Get all upcoming classes (any user)"""
+
+        # Initialize Database resource heandles
+        class_resource = ClassResource()
+        booking_resource = BookingResource()
+
+        # Fetch all upcoming classes from the database
+        upcoming_classes = class_resource.get_upcoming_classes()
+        
+        # This list will store the final formatted response
+        result = []
+
+        # Loop through each class and determine the remaining spots
+        for cls in upcoming_classes:
+
+            # Get class ID used to count the bookings
+            class_id = str(cls.get("_id"))
+
+            # The class activity (default is zero if missing)
+            capacity = cls.get(CAPACITY, 0)
+
+            # Count how many members booked this class, and use it to determine the remaining spots (class capacity - number of booked members)
+            booked_count = booking_resource.count_member_bookings(class_id)
+            remaining_spots = max(capacity - booked_count, 0)
+
+            # Print Class Contents for Each Class, including the Class ID and Name, Trainer Name, Start and End Date, Location, Description, and remaining spots
+            result.append({
+                "_id": cls.get("_id"),
+                TITLE: cls.get(TITLE),
+                "trainer_name": cls.get("trainer_name"),
+                START_DATE: cls.get(START_DATE),
+                END_DATE: cls.get(END_DATE),
+                LOCATION: cls.get(LOCATION),
+                DESCRIPTION: cls.get(DESCRIPTION),
+                "remaining_spots": remaining_spots
+            })
+
+        # Return the final list of incoming classes and HTTP status: OK
+        return result, HTTPStatus.OK
+
+
 
 
 @api.route("/<string:class_id>/members")
