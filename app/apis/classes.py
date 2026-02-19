@@ -4,9 +4,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from http import HTTPStatus
 from app.db.classes import ClassResource, TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION, TRAINER_ID
 from app.db.users import UserResource, ROLE_TRAINER, NAME
-from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME
+from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME, CLASS_ID
 from datetime import datetime
-from app.db.bookings import BookingResource, CLASS_ID
 
 api = Namespace("classes", description="Class management endpoints")
 
