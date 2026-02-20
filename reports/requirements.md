@@ -84,7 +84,7 @@
 
 **Description:**  
 1. Trainer/admin inputs the following details:  
-   - Name/Title  
+   - Class Name/Title  
    - Date and Time  
    - Duration  
    - Capacity (>0)  
@@ -114,20 +114,22 @@
 
 **Description:**  
 1. System displays upcoming classes only (past classes hidden).  
-2. Each class shows:  
-   - Name/Title  
-   - Trainer  
+2. Each class shows:
+   - Class ID
+   - Class Name/Title  
+   - Trainer Name
    - Date and Time  
    - Location  
    - Description/Type  
-   - Capacity/Remaining spots  
-3. Optional filters for future sprints (location, trainer, time).
+   - Remaining spots  
+4. Optional filters for future sprints (location, trainer, time).
 
 **Postconditions:**  
 - Users can see the list of classes and details.
 
 **Constraints:**  
-- Viewing does not require login for guests, but members can see their bookings.
+- Viewing does not require login for guests.
+- For future sprints, members will be able to view their bookings (previous and upcoming).
 
 ---
 
