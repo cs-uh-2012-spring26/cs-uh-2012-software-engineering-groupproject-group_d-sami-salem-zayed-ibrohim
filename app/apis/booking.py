@@ -105,3 +105,80 @@ class Bookings(Resource):
             "class_id": class_id,
             "user_email": user_email
         }, HTTPStatus.CREATED
+
+
+
+# For Feature 2: Allows Members to access their booked classes.
+@api.route("/my-classes")
+class MyBookedClasses(Resource):
+
+    @api.doc(security='Bearer')
+    @api.response(HTTPStatus.OK, "Booked classes retrieved successfully")
+    @api.response(HTTPStatus.UNAUTHORIZED, "Authentication required or invalid token")
+    @api.response(HTTPStatus.FORBIDDEN, "Access restricted to members only")
+    @api.response(HTTPStatus.NOT_FOUND, "No bookings found for this member")
+    @jwt_required()
+    def get(self):
+        """
+        Retrieve all classes booked by the currently logged-in member.
+        """
+
+        # Extract JWT claims
+        claims = get_jwt()
+        role = claims.get("role")
+        user_id = claims.get("user_id")
+
+        # Token exists but role is not member
+        if role != "member":
+            return {
+                "error": "FORBIDDEN",
+                "message": "Only members can view their bookings"
+            }, HTTPStatus.FORBIDDEN  # 403
+
+        # Token missing user_id (corrupted token case)
+        if not user_id:
+            return {
+                "error": "UNAUTHORIZED",
+                "message": "Invalid authentication token"
+            }, HTTPStatus.UNAUTHORIZED  # 401
+
+        # Create database resource instances
+        booking_resource = BookingResource()
+        class_resource = ClassResource()
+
+        # Retrieve all bookings made by this user
+        bookings = booking_resource.get_bookings_by_user(user_id)
+
+        # Member has no bookings
+        if not bookings:
+            return {
+                "error": "NOT_FOUND",
+                "message": "No booked classes found for this member"
+            }, HTTPStatus.NOT_FOUND  # 404
+
+
+        # This list will store full class details
+        result = []
+
+        # Loop through each booking record
+        for booking in bookings:
+
+            # Extract class ID from booking
+            class_id = booking.get(CLASS_ID)
+
+            # Retrieve full class details from classes collection
+            fitness_class = class_resource.get_class_by_id(class_id)
+
+            # If class exists, append formatted response
+            if fitness_class:
+                result.append({
+                    "class_id": class_id,
+                    "title": fitness_class.get("title"),
+                    "start_date": fitness_class.get("start_date"),
+                    "end_date": fitness_class.get("end_date"),
+                    "location": fitness_class.get("location"),
+                    "description": fitness_class.get("description")
+                })
+
+        # Return list of booked classes
+        return result, HTTPStatus.OK
