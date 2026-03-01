@@ -179,3 +179,39 @@
 **Constraints:**  
 - Trainers can only view members for their own classes.  
 - Members cannot view the roster.
+
+---
+
+### Feature 5: Email Reminders (Trainers Only)
+
+**Primary Actor:** Trainer  
+**Goal:** Allow trainer to send reminder emails to all registered members of a class.
+
+**Preconditions:**  
+- Trainer is authenticated.
+- Trainer made the class.
+- At least one member is booked in the class.
+
+**Triggers:**  
+- Trainer clicks "Send Reminder" button in the class.
+
+**Description:**  
+1. Trainer selects a class they created.  
+2. System receives all registered members for the class.
+3. If no members are registered, system returns a message: "No registered members to notify".
+4. For each member, system sends an email that includes:
+- Participant name
+- Class name/title
+- Class start and end date/time
+- Class location
+- Gym branding in the subject line (e.g., NYUAD GYM: Reminder for [Class Name])
+5. Trainer receives a confirmation that reminders were sent successfully.
+
+**Postconditions:**  
+- All booked members receive a reminder email about the upcoming class.
+- If sending fails for any email, the trainer is notified of the error.
+
+**Constraints:**
+- Only the assigned trainer can send reminders for a class.
+- Trainer cannot send reminders for classes they are not assigned to.
+- Emails are sent via AWS SES; both sender and recipients must be verified if in SES sandbox mode.
