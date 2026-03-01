@@ -1,5 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
+from app.services.email_service import EmailService
 
 # SES (Simple Email Service) implementation of a generic EmailService. Can be reused for other services later on.
 class SESEmailService(EmailService):

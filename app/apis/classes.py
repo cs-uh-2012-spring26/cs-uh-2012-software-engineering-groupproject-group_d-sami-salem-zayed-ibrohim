@@ -225,6 +225,8 @@ class ClassMembers(Resource):
 
 
 
+from app.services.reminder_service import ReminderService
+from app.services.ses_email_service import SESEmailService
 
 # Endpoint for sending reminder emails to members of a specific fitness class. Accessible only by the trainer assigned to the class.
 @api.route("/<string:class_id>/reminder")
@@ -250,7 +252,7 @@ class ClassReminder(Resource):
             }, 403
 
         reminder_service = ReminderService(
-            SESEmailService("nyuad.gym@gmail.com")
+            SESEmailService("NYUAD.GYM@gmail.com")
         )
 
         return reminder_service.send_reminder(class_id, trainer_id)

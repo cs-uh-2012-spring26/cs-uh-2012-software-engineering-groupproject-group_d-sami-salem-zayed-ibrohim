@@ -1,4 +1,4 @@
-from app.db.classes import ClassResource, TRAINER_ID, TITLE, START_DATE
+from app.db.classes import ClassResource, TRAINER_ID, TITLE, START_DATE, END_DATE
 from app.db.bookings import BookingResource, USER_EMAIL, USER_NAME
 
 class ReminderService:
