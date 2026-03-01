@@ -221,3 +221,38 @@ class ClassMembers(Resource):
                 })
 
         return members, HTTPStatus.OK
+
+
+
+
+from app.services.reminder_service import ReminderService
+from app.services.ses_email_service import SESEmailService
+
+# Endpoint for sending reminder emails to members of a specific fitness class. Accessible only by the trainer assigned to the class.
+@api.route("/<string:class_id>/reminder")
+class ClassReminder(Resource):
+    @api.doc(security="Bearer")
+    @api.response(200, "Reminder emails sent successfully")
+    @api.response(404, "Class not found")
+    @api.response(403, "Only the assigned trainer of this class can send reminders")
+    @api.response(400, "No registered members for this class")
+    @api.response(500, "Failed to send one or more emails")
+    @jwt_required()
+
+    # Triggers reminder emails for a class. Validates the trainer role and uses ReminderService to send emails to all registered members.
+    def post(self, class_id):
+        claims = get_jwt()
+        trainer_id = claims.get("user_id")
+        role = claims.get("role")
+
+        # Check trainer role
+        if role != ROLE_TRAINER:
+            return {
+                "message": "Access denied. Only trainers can send class reminders."
+            }, 403
+
+        reminder_service = ReminderService(
+            SESEmailService("NYUAD.GYM@gmail.com")
+        )
+
+        return reminder_service.send_reminder(class_id, trainer_id)
