@@ -1,3 +1,4 @@
+[![CI Workflow for Testing](https://github.com/cs-uh-2012-spring26/cs-uh-2012-software-engineering-groupproject-group_d-sami-salem-zayed-ibrohim/actions/workflows/tests.yml/badge.svg)](https://github.com/cs-uh-2012-spring26/cs-uh-2012-software-engineering-groupproject-group_d-sami-salem-zayed-ibrohim/actions/workflows/tests.yml)
 # Fitness Class Management System
 
 A Flask REST API server for managing fitness classes, bookings, and user authentication. The system supports three user types: guests (view classes), members (view and book classes), and trainers (create classes and view member rosters).
