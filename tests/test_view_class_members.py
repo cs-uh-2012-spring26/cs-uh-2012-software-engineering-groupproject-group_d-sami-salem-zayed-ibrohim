@@ -37,13 +37,18 @@ def other_trainer_token(app):
 
 
 @pytest.fixture
-def sample_class(app):
-    """Create a fitness class owned by trainer_id_123 and return its ID."""
+def sample_class(app, trainer_token):
+    """Create a fitness class owned by the actual trainer from DB and return its ID."""
     with app.app_context():
+        from app.db.users import UserResource
+        user_resource = UserResource()
+        trainer = user_resource.get_user_by_email("trainer@test.com")
+        trainer_id = str(trainer["_id"])
+        
         class_resource = ClassResource()
         class_id = class_resource.create_class(
             title="Yoga Basics",
-            trainer_id="trainer_id_123",
+            trainer_id=trainer_id,
             trainer_name="Test Trainer",
             start_date=datetime.now() + timedelta(days=1),
             end_date=datetime.now() + timedelta(days=1, hours=1),
@@ -55,7 +60,7 @@ def sample_class(app):
 
 
 @pytest.fixture
-def sample_bookings(app, sample_class):
+def sample_bookings(app, sample_class, trainer_token):
     """
     Create 3 bookings for the sample class:
     - Alice (member)
@@ -64,6 +69,11 @@ def sample_bookings(app, sample_class):
     Returns the class ID.
     """
     with app.app_context():
+        from app.db.users import UserResource
+        user_resource = UserResource()
+        trainer = user_resource.get_user_by_email("trainer@test.com")
+        trainer_id = str(trainer["_id"])
+        
         booking_resource = BookingResource()
         booking_resource.create_booking(
             class_id=sample_class,
@@ -81,7 +91,7 @@ def sample_bookings(app, sample_class):
         )
         booking_resource.create_booking(
             class_id=sample_class,
-            user_id="trainer_id_123",
+            user_id=trainer_id,
             user_email="trainer@test.com",
             user_name="Test Trainer",
             is_trainer=True
@@ -162,7 +172,9 @@ def test_view_members_filters_trainer_bookings(client, trainer_token, sample_boo
         f"/classes/{sample_bookings}/members",
         headers={"Authorization": f"Bearer {trainer_token}"}
     )
+    assert resp.status_code == HTTPStatus.OK
     members = resp.json
+    assert len(members) == 2  # Only Alice and Bob, not the trainer
     assert members[0][USER_EMAIL] != "trainer@test.com"
     assert members[1][USER_EMAIL] != "trainer@test.com"
     assert members[0][USER_NAME] != "Test Trainer"

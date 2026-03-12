@@ -39,19 +39,53 @@ def client(app):
 
 @pytest.fixture
 def trainer_token(app):
-    """JWT token for a trainer (user_id: trainer_id_123)."""
+    """JWT token for a trainer. Also creates the user in DB and uses actual user_id."""
     with app.app_context():
+        from app.db.users import UserResource
+        user_resource = UserResource()
+        
+        # Try to get existing user or create new one
+        trainer = user_resource.get_user_by_email("trainer@test.com")
+        if not trainer:
+            user_id = user_resource.create_user(
+                email="trainer@test.com",
+                password="password123",
+                name="Test Trainer",
+                birthday="1990-01-01",
+                role="trainer"
+            )
+            trainer_user_id = str(user_id)
+        else:
+            trainer_user_id = str(trainer["_id"])
+        
         return create_access_token(
             identity="trainer@test.com",
-            additional_claims={"role": "trainer", "user_id": "trainer_id_123"}
+            additional_claims={"role": "trainer", "user_id": trainer_user_id}
         )
 
 
 @pytest.fixture
 def member_token(app):
-    """JWT token for a regular member (not a trainer)."""
+    """JWT token for a regular member. Also creates the user in DB and uses actual user_id."""
     with app.app_context():
+        from app.db.users import UserResource
+        user_resource = UserResource()
+        
+        # Try to get existing user or create new one
+        member = user_resource.get_user_by_email("member@test.com")
+        if not member:
+            user_id = user_resource.create_user(
+                email="member@test.com",
+                password="password123",
+                name="Test Member",
+                birthday="1995-05-15",
+                role="member"
+            )
+            member_user_id = str(user_id)
+        else:
+            member_user_id = str(member["_id"])
+        
         return create_access_token(
             identity="member@test.com",
-            additional_claims={"role": "member", "user_id": "member_id_456"}
+            additional_claims={"role": "member", "user_id": member_user_id}
         )
