@@ -29,13 +29,18 @@ def other_trainer_token(app):
 
 
 @pytest.fixture
-def sample_class(app):
-    """Create a fitness class owned by trainer_id_123 and return its ID."""
+def sample_class(app, trainer_token):
+    """Create a fitness class owned by the actual trainer from DB and return its ID."""
     with app.app_context():
+        from app.db.users import UserResource
+        user_resource = UserResource()
+        trainer = user_resource.get_user_by_email("trainer@test.com")
+        trainer_id = str(trainer["_id"])
+        
         class_resource = ClassResource()
         class_id = class_resource.create_class(
             title="Yoga Basics",
-            trainer_id="trainer_id_123",
+            trainer_id=trainer_id,
             trainer_name="Test Trainer",
             start_date=datetime.now() + timedelta(days=1),
             end_date=datetime.now() + timedelta(days=1, hours=1),
