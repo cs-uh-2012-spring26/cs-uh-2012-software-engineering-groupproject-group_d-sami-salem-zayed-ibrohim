@@ -15,8 +15,9 @@ class DB:
         create_db = mongomockClient if app.config["MOCK_DB"] else pyMongoClient
         client = create_db(app.config["MONGO_URI"])
 
-        # check if the database is connected. Else fail.
-        client.server_info()
+        # check if the database is connected. Else fail. (Only for real MongoDB, not mongomock)
+        if not app.config["MOCK_DB"]:
+            client.server_info()
         cls._db = client[app.config["DB_NAME"]]
 
     @classmethod
