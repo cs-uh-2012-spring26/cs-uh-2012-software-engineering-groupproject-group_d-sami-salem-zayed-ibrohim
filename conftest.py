@@ -30,6 +30,11 @@ def app():
     application.config["PROPAGATE_EXCEPTIONS"] = True
     yield application
 
+    from app.db import DB
+    db = DB._get()
+    for collection_name in db.list_collection_names():
+        db.drop_collection(collection_name)
+
 
 @pytest.fixture
 def client(app):
