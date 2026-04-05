@@ -6,6 +6,7 @@ from app.db.classes import ClassResource, TITLE, START_DATE, END_DATE, CAPACITY,
 from app.db.users import UserResource, ROLE_TRAINER, NAME
 from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME, CLASS_ID
 from datetime import datetime
+from app.config import Config
 
 api = Namespace("classes", description="Class management endpoints")
 
@@ -250,9 +251,10 @@ class ClassReminder(Resource):
             return {
                 "message": "Access denied. Only trainers can send class reminders."
             }, 403
+        
 
         reminder_service = ReminderService(
-            SESEmailService("NYUAD.GYM@gmail.com")
+            SESEmailService(Config.SES_SENDER_EMAIL)
         )
 
         return reminder_service.send_reminder(class_id, trainer_id)
