@@ -19,6 +19,7 @@ def app():
     os.environ["MOCK_DB"] = "true"
     os.environ["DEBUG"] = "true"
     os.environ["JWT_SECRET_KEY"] = "test-secret-key"
+    os.environ["SES_SENDER_EMAIL"] = "test@example.com"
 
     from importlib import reload
     import app.config

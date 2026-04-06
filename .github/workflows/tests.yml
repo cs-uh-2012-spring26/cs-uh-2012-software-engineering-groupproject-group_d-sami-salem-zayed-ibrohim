@@ -15,12 +15,12 @@ jobs:
         python-version: ["3.10", "3.11"]
 
     env:
-      # Test environment variables
-      MONGO_URI: mongodb://localhost:27017
-      DB_NAME: test_db
-      MOCK_DB: "true"
-      DEBUG: "false"
-      JWT_SECRET_KEY: 'fake_secret_key_for_testing' # I am only using this for testing purposes, do not use this in production
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      MOCK_DB: ${{ secrets.MOCK_DB }}
+      DEBUG: ${{ secrets.DEBUG }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      SES_SENDER_EMAIL: ${{ secrets.SES_SENDER_EMAIL }}
 
     steps:
       - name: Checkout repository
