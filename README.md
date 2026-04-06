@@ -38,78 +38,61 @@ for more info specific to testing Flask applications)
 - Class management (create, view upcoming classes)
 - Booking system with capacity management
 - Trainer-specific features (view class rosters)
+- Email Reminder Feature
 
-## API Endpoints
+# Running Locally
 
-### Authentication
-- `POST /auth/register` - Register a new user (member or trainer)
-- `POST /auth/login` - Login and receive JWT token
+## 1. Start MongoDB
 
-### Classes
-- `GET /classes` - View all upcoming classes (public)
-- `POST /classes` - Create a new class (trainers only)
-- `GET /classes/<class_id>/members` - View members who booked a class (trainer of that class only)
+Before launching the server, ensure that MongoDB is running:
 
-### Bookings
-- `POST /bookings` - Book a class (members only)
+- **macOS:** `brew services restart mongodb-community`
+- **Linux:** `sudo systemctl restart mongod`
 
-## Running Locally
+---
 
-This assumes you are already running MongoDB (e.g., through
-`brew services restart mongodb-community` on MacOS or
-`sudo systemctl restart mongod` on Linux.
-Find the equivalent for your OS)
+## 2. Configure the `.env` File
 
-### Setting up the environment
+Create a `.env` file in the root directory of your project. Here is a sample .env file (THIS IS THE BARE MINIMUM):
 
-1. Create a `.env` file in the root of your project and include the following variables:
+    # database configs
+    MONGO_URI="mongodb://localhost:27017"
+    DB_NAME="fitness_class_dev"
+    MOCK_DB="false"
 
-- `MONGO_URI` – The connection string for your MongoDB database.
-- `DB_NAME` – The name of the database your application will use.
-- `MOCK_DB` – Set to `true` to use a mock database (for testing), or `false` to use the real database.
-- `DEBUG` – Enable debug mode by setting this to `true` (optional, useful for development).
-- `JWT_SECRET_KEY` – A secret key used to sign and verify JWT authentication tokens.
+    # server config
+    DEBUG="true"
+    JWT_SECRET_KEY="9f8c1e5a6b4d3c2e1a9b8f7d6c5e4a3b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4"
+    SES_SENDER_EMAIL="NYUAD.GYM@gmail.com"
 
-2. Run `make dev_env` to create a virtual environment and install dependencies
+> Note: This assumes you have an active, production-grade AWS account with Amazon SES email functionality enabled. For more information, check out this: [Link](https://aws.amazon.com/ses/).
 
-### Running the server
+---
+
+## 3. Set Up Virtual Environment and Install Dependencies
+
+Run:
+
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+
+
+## 4. Running the server
 
 1. Run `make run_local_server` to run the server. This will also run the tests first.
 2. Go to [http://127.0.0.1:8000](http://127.0.0.1:8000) to see it running!
 
 You can use `ctrl-c` to stop the server.
 
-### Testing the API server
+> Note: Alternatively, you can run the following command: `FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
+
+## 5. (Optional) Testing the API server
 
 Run `make tests` to execute the test suite and see the coverage report
 in your terminal. You can also see a visual report by viewing
 [/htmlcov/index.html](/htmlcov/index.html) in your browser.
 
-### Manually activating and deactivating the virtual environment
-
-Manually activating and deactivating the virtual environment is useful for
-debugging issues and running specific scripts with flexibility (e.g., you can
-run `FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
-inside the virtual environment to directly start
-the server without running tests first).
-
-To activate the virtual environment manually:
-
-```sh
-source .venv/bin/activate
-```
-
-Alternatively, you can use:
-
-```sh
-. .venv/bin/activate
-```
-
-To deactivate the virtual environment:
-
-```sh
-deactivate
-```
 
 ## Project Structure
 
@@ -117,6 +100,7 @@ deactivate
 - `/app/db/` - Database models and operations
 - `/docs/` - Project documentation
 - `/reports/` - Requirements and specifications
+- `/tests/` - test suits (targeting every functionality)
 
 ## Best Practices
 
