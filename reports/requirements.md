@@ -172,7 +172,8 @@
 
 ### Feature 5: Email Reminders (Trainers Only)
 
-**Primary Actor:** Trainer  
+**Primary Actor:** Trainer
+**Secondary Actor:** Amazon Simple Email Service (SES) 
 **Goal:** Allow trainer to send reminder emails to all registered members of a class.
 
 **Preconditions:**  
@@ -186,7 +187,7 @@
 1. Trainer selects a class they created.  
 2. System verifies the class exists and the trainer is assigned to it.  
 3. System retrieves all booked members for the class.  
-4. For each member, system sends an email containing:  
+4. For each member, system sends an email, through Amazon's SES, containing:  
    - Participant name  
    - Class name/title  
    - Class start and end date/time  
@@ -199,6 +200,7 @@
 - **A2 – Class does not exist:** System informs the trainer that the class was not found.  
 - **A3 – Trainer is not assigned to this class:** System rejects the request and informs the trainer that they are not authorized to send reminders for this class.  
 - **A4 – No members are booked in the class:** System informs the trainer that there are no registered members to notify.  
+- **A5 - Email not validated by Amazon SES:** System informs the trainer that it couldn't locate the credentials
 
 **Postconditions:**  
 - All booked members receive a reminder email about the upcoming class.
