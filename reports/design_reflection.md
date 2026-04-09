@@ -6,6 +6,11 @@
 
 ## Team member responsibilies:
 
+- Task 1: Zayed
+- Task 2: Salem
+- Task 3: Ibrohim
+- Task 4: Sami
+
 # Design Diagrams (Task 1)
 
 # Written analysis of reflection of design principles (Task 2)
