@@ -201,6 +201,8 @@
 - **A3 – Trainer is not assigned to this class:** System rejects the request and informs the trainer that they are not authorized to send reminders for this class.  
 - **A4 – No members are booked in the class:** System informs the trainer that there are no registered members to notify.  
 - **A5 - Email not validated by Amazon SES:** System informs the trainer that it couldn't locate the credentials
+- **A6 – Class has already ended:** System rejects the request and informs the trainer that the class has already ended and reminders cannot be sent.
+
 
 **Postconditions:**  
 - All booked members receive a reminder email about the upcoming class.
