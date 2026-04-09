@@ -1,3 +1,4 @@
+from datetime import datetime
 from app.db.classes import ClassResource, TRAINER_ID, TITLE, START_DATE, END_DATE
 from app.db.bookings import BookingResource, USER_EMAIL, USER_NAME
 
@@ -17,6 +18,21 @@ class ReminderService:
         # Ensure the trainer made this class
         if fitness_class.get(TRAINER_ID) != trainer_id:
             return {"message": "Forbidden: Not the trainer of this class"}, 403
+
+        # Check if the class has already ended
+        end_date = fitness_class.get(END_DATE)
+        try:
+            # Handle both datetime objects and serialized strings
+            if isinstance(end_date, str):
+                end_date_dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+            else:
+                end_date_dt = end_date
+            
+            if end_date_dt < datetime.now():
+                return {"message": "Cannot send reminders for a class that has already ended"}, 400
+        except (ValueError, TypeError):
+            # If date parsing fails, continue with reminder sending
+            pass
 
         # Get all bookings for the class
         bookings = self.booking_resource.get_bookings_by_class(class_id)

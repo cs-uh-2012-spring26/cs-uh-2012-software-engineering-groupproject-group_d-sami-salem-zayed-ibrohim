@@ -116,6 +116,48 @@ def test_reminder_trainer_not_owner(mock_ses, client, other_trainer_token, sampl
 
 
 @patch("app.apis.classes.SESEmailService")
+def test_reminder_class_already_ended(mock_ses, client, trainer_token, app):
+    """A class that has already ended should return 400."""
+    with app.app_context():
+        from app.db.users import UserResource
+        from app.db.classes import ClassResource
+        from app.db.bookings import BookingResource
+        
+        user_resource = UserResource()
+        trainer = user_resource.get_user_by_email("trainer@test.com")
+        trainer_id = str(trainer["_id"])
+        
+        class_resource = ClassResource()
+        class_id = class_resource.create_class(
+            title="Past Yoga Class",
+            trainer_id=trainer_id,
+            trainer_name="Test Trainer",
+            start_date=datetime.now() - timedelta(days=2),
+            end_date=datetime.now() - timedelta(days=1),
+            capacity=20,
+            location="Studio A",
+            description="A past yoga class"
+        )
+        
+        # Add a booking so it doesn't fail on "no members"
+        booking_resource = BookingResource()
+        booking_resource.create_booking(
+            class_id=str(class_id),
+            user_id="member_id_1",
+            user_email="alice@test.com",
+            user_name="Alice",
+            is_trainer=False
+        )
+    
+    resp = client.post(
+        f"/classes/{str(class_id)}/reminder",
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    assert resp.status_code == 400
+    assert resp.json == {"message": "Cannot send reminders for a class that has already ended"}
+
+
+@patch("app.apis.classes.SESEmailService")
 def test_reminder_no_bookings(mock_ses, client, trainer_token, sample_class):
     """A class with no bookings should return 400."""
     resp = client.post(
