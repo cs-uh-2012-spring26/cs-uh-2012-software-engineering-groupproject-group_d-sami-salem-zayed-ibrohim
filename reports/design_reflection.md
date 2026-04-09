@@ -20,10 +20,10 @@
 - long method: post in [app/apis/classes.py](../app/apis/classes.py#L44) is a long method because it handles auth, validation, parsing, overlap checks, persistence, and response formatting in one block.  
   image: [code_smell_1.png](images/code_smell_1.png)
 
-- long method: post in [app/apis/booking.py](../app/apis/booking.py#L28) is a long method because it combines jwt checks, request parsing, booking rules, user lookup, and insert logic.  
+- dead code: jwt = jwtmanager(app) in [app/__init__.py](../app/__init__.py#L19) is created but never used after assignment.
   image: [code_smell_2.png](images/code_smell_2.png)
 
-- long method: send_reminder in [app/services/reminder_service.py](../app/services/reminder_service.py#L5) is a long method because it does class lookup, ownership validation, end-date checking, booking retrieval, email body construction, and sending.  
+- primitive obsession: date and time are parsed as raw strings [app/apis/classes.py](../app/apis/classes.py#L82).
   image: [code_smell_3.png](images/code_smell_3.png)
 
 - long parameter list: create_class in [app/db/classes.py](../app/db/classes.py#L26) has a long parameter list because it takes 8 inputs: title, trainer_id, trainer_name, start_date, end_date, capacity, location, and description.  
