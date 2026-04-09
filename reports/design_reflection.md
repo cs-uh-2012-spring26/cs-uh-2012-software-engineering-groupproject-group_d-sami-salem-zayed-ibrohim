@@ -23,7 +23,7 @@
 2. dead code: jwt = jwtmanager(app) in [app/__init__.py](../app/__init__.py#L19) is created but never used after assignment.
   image: [code_smell_2.png](images/code_smell_2.png)
 
-3. primitive obsession: date and time are parsed as raw strings [app/apis/classes.py](../app/apis/classes.py#L82).
+3. primitive obsession: date and time are parsed as raw strings [app/apis/classes.py](../app/apis/classes.py#L82). Better to take the DateRange into separate class with its own methods (overlap checking, past validation) and attributes (start time, end time).
   image: [code_smell_3.png](images/code_smell_3.png)
 
 4. long parameter list: create_class in [app/db/classes.py](../app/db/classes.py#L26) has a long parameter list because it takes 8 inputs: title, trainer_id, trainer_name, start_date, end_date, capacity, location, and description.  
