@@ -13,39 +13,7 @@
 
 # Design Diagrams (Task 1)
 
-# Written analysis of reflection of design principles (Task 2)
-
-# Code smells (Task 3)
-
-1. long method: post in [app/apis/classes.py](../app/apis/classes.py#L52) is a long method because it handles auth, validation, parsing, overlap checks, persistence, and response formatting in one block.  
-  image: ![code_smell_1.png](images/code_smell_1.png)
-
-2. dead code: jwt = jwtmanager(app) in [app/__init__.py](../app/__init__.py#L19) is created but never used after assignment.
-  image: ![code_smell_2.png](images/code_smell_2.png)
-
-3. primitive obsession: date and time are parsed as raw strings [app/apis/classes.py](../app/apis/classes.py#L82). Better to take the DateRange into separate class with its own methods (overlap checking, past validation) and attributes (start time, end time).
-  image: ![code_smell_3.png](images/code_smell_3.png)
-
-4. long parameter list: create_class in [app/db/classes.py](../app/db/classes.py#L26) has a long parameter list because it takes 8 inputs: title, trainer_id, trainer_name, start_date, end_date, capacity, location, and description.  
-  image: ![code_smell_4.png](images/code_smell_4.png)
-
-5. duplicate code: getting jwt claims all repeat the same pattern in different places.
-- a. [app/apis/classes.py](../app/apis/classes.py#L54)
-- b. [app/apis/classes.py](../app/apis/classes.py#L184)
-- c. [app/apis/booking.py](../app/apis/booking.py#L39)
-
-
-  images: 
-  1. ![code_smell_5a.png](images/code_smell_5a.png)
-  2. ![code_smell_5b.png](images/code_smell_5b.png)
-  3. [!code_smell_5c.png](images/code_smell_5c.png)
-
-# Reflection on current design: pros and cons (Task 4)
-# Design Reflection Report
-**CS-UH 2012 Software Engineering — Sprint 3A**
-**Group D: Sami, Salem, Zayed, Ibrohim**
-
-## Task 2: Reflection on Design Principles
+# Task 2: Reflection on Design Principles
 
 We manually reviewed the codebase and found five examples where design principles are either violated or correctly applied, covering five distinct principles.
 
@@ -182,3 +150,64 @@ class TelegramService(EmailService):
 ```
 
 No existing code needs to be modified. `ReminderService` will work with the new class automatically because it depends on `EmailService` in general, not on `SESEmailService` specifically.
+
+# Code smells (Task 3)
+
+1. long method: post in [app/apis/classes.py](../app/apis/classes.py#L52) is a long method because it handles auth, validation, parsing, overlap checks, persistence, and response formatting in one block.  
+  image: ![code_smell_1.png](images/code_smell_1.png)
+
+2. dead code: jwt = jwtmanager(app) in [app/__init__.py](../app/__init__.py#L19) is created but never used after assignment.
+  image: ![code_smell_2.png](images/code_smell_2.png)
+
+3. primitive obsession: date and time are parsed as raw strings [app/apis/classes.py](../app/apis/classes.py#L82). Better to take the DateRange into separate class with its own methods (overlap checking, past validation) and attributes (start time, end time).
+  image: ![code_smell_3.png](images/code_smell_3.png)
+
+4. long parameter list: create_class in [app/db/classes.py](../app/db/classes.py#L26) has a long parameter list because it takes 8 inputs: title, trainer_id, trainer_name, start_date, end_date, capacity, location, and description.  
+  image: ![code_smell_4.png](images/code_smell_4.png)
+
+5. duplicate code: getting jwt claims all repeat the same pattern in different places.
+- a. [app/apis/classes.py](../app/apis/classes.py#L54)
+- b. [app/apis/classes.py](../app/apis/classes.py#L184)
+- c. [app/apis/booking.py](../app/apis/booking.py#L39)
+
+
+  images: 
+  1. ![code_smell_5a.png](images/code_smell_5a.png)
+  2. ![code_smell_5b.png](images/code_smell_5b.png)
+  3. [!code_smell_5c.png](images/code_smell_5c.png)
+
+# Task 4: Sprint 3B Feature Reflection
+
+## How the current design affects Feature 6 and Feature 7
+
+The current design is likely to hinder the implementation of Feature 6 (Create Recurring Class) and Feature 7 (Configure Notifications), especially from maintainability and extensibility perspectives.
+
+- `app/apis/classes.py` contains a long, multi-responsibility `Classes.post()` flow that mixes auth, request parsing, validation, scheduling conflict checks, persistence, and response formatting. This makes adding recurring class logic harder and increases the risk of bugs.
+- Date and time are handled as raw strings rather than a reusable date/schedule domain model. Recurring classes need a cleaner abstraction for recurrence rules, date ranges, and overlap logic.
+- `Classes.get()` and similar API code access raw database fields directly, which reduces encapsulation. This will make schema changes or the addition of recurrence metadata more difficult.
+- The same file has low cohesion, combining class creation, membership listing, and reminder sending. Adding new notification preferences or recurring-class endpoints in this module will worsen maintainability.
+- Duplicate JWT claim extraction in `app/apis/classes.py` and `app/apis/booking.py` shows missing shared auth handling. This increases boilerplate when adding new protected endpoints for notification configuration or recurring class management.
+
+## Specific impacts on Feature 6: Create Recurring Class
+
+- The long `post()` method means the recurring class logic would need to be bolted onto an already complex path.
+- Primitive date parsing makes it difficult to express and validate recurrence patterns like daily or monthly classes.
+- The database layer uses long parameter lists and raw field access, which means recurring schedule metadata would likely be spread across several places rather than encapsulated.
+
+## Specific impacts on Feature 7: Configure Notifications
+
+- The existing notification handling is currently limited to email, but the `EmailService` / `SESEmailService` pattern is a good foundation.
+- The system lacks a user preference or notification-settings model, so implementing channel selection (email/Telegram/SMS) would require new abstractions and likely refactoring of the reminder flow.
+- Low modularity in the API layer means new notification endpoints would be added into already crowded files instead of isolated resources.
+
+## Existing design flaws that make new features harder
+
+1. `Classes.post()` is too long and violates abstraction/SRP.
+2. Date/time handling is primitive and not encapsulated.
+3. JWT claim extraction is duplicated across endpoints.
+4. `app/apis/classes.py` has low cohesion and mixes unrelated resources.
+5. Raw DB field access in the API layer breaks encapsulation.
+
+## Conclusion
+
+The current design contains enough maintanability issues that Feature 6 and Feature 7 will be more difficult to implement cleanly without refactoring. The team should prioritize extracting class creation and scheduling logic into services, introducing a reusable recurrence/date model, centralizing auth handling, and separating API resources before adding these new features.
