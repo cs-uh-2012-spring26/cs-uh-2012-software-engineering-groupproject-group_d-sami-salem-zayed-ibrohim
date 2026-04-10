@@ -21,6 +21,7 @@ jobs:
       MOCK_DB: "true"
       DEBUG: "false"
       JWT_SECRET_KEY: 'fake_secret_key_for_testing' # I am only using this for testing purposes, do not use this in production
+      SES_SENDER_EMAIL: 'placeholder@gmail.com' # Used for testing purposes, not for production
 
     steps:
       - name: Checkout repository
