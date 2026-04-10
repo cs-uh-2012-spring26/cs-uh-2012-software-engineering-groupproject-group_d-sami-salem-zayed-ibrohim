@@ -43,7 +43,18 @@ Ibrohim Iskandarov:
 - Identifying 3 code smells
 - Reflecting on the incorporation of feature 7
 
-# Design Diagrams (Task 1)
+# Task 1: Design Diagrams
+
+In this section, we document the current architecture of the Fitness Class Management system. These diagrams represent the system as it exists at the end of Sprint 2.
+
+### 1.1 Class Diagram
+![ClassDiagram](images/Sprint3_ClassDiagram.png)
+
+### 1.2 Sequence Diagram: Book a Class Endpoint
+![SequenceDiagram_BookaClass](images/Sprint3_SequenceDiagramBookaClass.png)
+
+### 1.3 Sequence Diagram: Send Class Reminders Endpoint
+![SequenceDiagram_SendingClassReminders](images/Sprint3_SequenceDiagramSendingReminders.png)
 
 # Task 2: Reflection on Design Principles
 
