@@ -22,7 +22,7 @@ Zayed Al Tamimi:
 Sami Akouk:
 
 - Writing the analysis report
-- Reviewing the class diagram
+- Reviewing the sequence diagram
 - Identifying a design violation
 - Identifying a code smell
 - Reflecting on the incorporation of features 6 and 7
@@ -30,7 +30,7 @@ Sami Akouk:
 Salem Al Shamsi:
 
 - Writing the analysis report
-- Reviewing a sequence diagram
+- Reviewing a class diagram
 - Identifying 3 design violations
 - Identifying a code smell
 - Reflecting on the incorporation of feature 6
