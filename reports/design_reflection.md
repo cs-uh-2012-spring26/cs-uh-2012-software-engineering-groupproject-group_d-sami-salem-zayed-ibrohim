@@ -2,14 +2,46 @@
 
 ## Tools used
 
+- SonarQube  was used to find the code smells, but was not implemented. Usage was for learning purposes only.
+- For creating class diagram and sequence diagrams, a slightly altered version of PySequenceReverse was used.
+
 ## Manual analysis done:
+
+- To identify the code smells and S.O.L.I.D principles violations we have manually analyzed the code. Particularly, we have analyzed the API endpoints, database code and remainder service code.
 
 ## Team member responsibilies:
 
-- Task 1: Zayed
-- Task 2: Salem
-- Task 3: Ibrohim
-- Task 4: Sami
+Zayed Al Tamimi:
+
+- Writing the analysis report
+- Creating the class diagram and sequence diagrams
+- Identifying a design violation
+- Identifying a code smell
+- Reflecting on the incorporation of feature 6
+
+Sami Akouk:
+
+- Writing the analysis report
+- Reviewing the class diagram
+- Identifying a design violation
+- Identifying a code smell
+- Reflecting on the incorporation of features 6 and 7
+
+Salem Al Shamsi:
+
+- Writing the analysis report
+- Reviewing a sequence diagram
+- Identifying 3 design violations
+- Identifying a code smell
+- Reflecting on the incorporation of feature 6
+
+Ibrohim Iskandarov:
+
+- Writing the analysis report
+- Reviewing a sequence diagram
+- Identifying a design violation
+- Identifying 3 code smells
+- Reflecting on the incorporation of feature 7
 
 # Design Diagrams (Task 1)
 

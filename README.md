@@ -102,6 +102,15 @@ in your terminal. You can also see a visual report by viewing
 - `/reports/` - Requirements and specifications
 - `/tests/` - test suits (targeting every functionality)
 
+## Design Analysis Tools (Sprint 3A)
+
+For the Sprint 3A design reflection analysis:
+
+- **SonarQube** was used to identify code smells (for learning purposes).
+- **PySequenceReverse** was used to generate sequence diagrams for the booking and reminder flows.
+- Manual code review was also performed to identify design principle violations and validate findings.
+- See [/reports/design_reflection.md](/reports/design_reflection.md) for the detailed design analysis, including UML diagrams and code smell documentation.
+
 ## Best Practices
 
 See [/docs/BestPractices.md](/docs/BestPractices.md) for advice regarding branch naming and other useful tips.
