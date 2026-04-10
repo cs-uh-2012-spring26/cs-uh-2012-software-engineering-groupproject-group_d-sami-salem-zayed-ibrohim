@@ -36,6 +36,9 @@
 - View Members
 - Send Reminder Emails
 
+**Amazon Simple Email Service**
+- Send Reminder Emails (Handles email delivery on behalf of the system)
+
 ## Use Cases
 
 ### Feature 1: Create Class (Trainer/Admin)
