@@ -1,5 +1,7 @@
 from app.apis.auth import api as auth_ns
-from app.apis.classes import api as class_ns
+from app.apis.class_resource import api as class_ns
+import app.apis.class_members_resource  # noqa: registers ClassMembers routes to class_ns
+import app.apis.class_reminder_resource  # noqa: registers ClassReminder routes to class_ns
 from app.apis.booking import api as booking_ns
 from app.config import Config
 from app.db import DB
