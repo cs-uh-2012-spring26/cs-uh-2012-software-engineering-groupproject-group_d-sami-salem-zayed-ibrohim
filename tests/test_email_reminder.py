@@ -82,7 +82,7 @@ def sample_bookings(app, sample_class):
 # Tests for POST /classes/<class_id>/reminder
 # ──────────────────────────────────────────────
 
-@patch("app.apis.classes.SESEmailService")
+@patch("app.apis.class_reminder_resource.SESEmailService")
 def test_non_trainer_cannot_send_reminder(mock_ses, client, member_token, sample_class):
     """A user with 'member' role should get 403 Forbidden."""
     resp = client.post(
@@ -93,7 +93,7 @@ def test_non_trainer_cannot_send_reminder(mock_ses, client, member_token, sample
     assert resp.json == {"message": "Access denied. Only trainers can send class reminders."}
 
 
-@patch("app.apis.classes.SESEmailService")
+@patch("app.apis.class_reminder_resource.SESEmailService")
 def test_reminder_class_not_found(mock_ses, client, trainer_token):
     """Sending a reminder for a non-existent class should return 404."""
     resp = client.post(
@@ -104,7 +104,7 @@ def test_reminder_class_not_found(mock_ses, client, trainer_token):
     assert resp.json == {"message": "Class not found"}
 
 
-@patch("app.apis.classes.SESEmailService")
+@patch("app.apis.class_reminder_resource.SESEmailService")
 def test_reminder_trainer_not_owner(mock_ses, client, other_trainer_token, sample_class):
     """A trainer who doesn't own the class should get 403 Forbidden."""
     resp = client.post(
@@ -115,7 +115,7 @@ def test_reminder_trainer_not_owner(mock_ses, client, other_trainer_token, sampl
     assert resp.json == {"message": "Forbidden: Not the trainer of this class"}
 
 
-@patch("app.apis.classes.SESEmailService")
+@patch("app.apis.class_reminder_resource.SESEmailService")
 def test_reminder_class_already_ended(mock_ses, client, trainer_token, app):
     """A class that has already ended should return 400."""
     with app.app_context():
@@ -157,7 +157,7 @@ def test_reminder_class_already_ended(mock_ses, client, trainer_token, app):
     assert resp.json == {"message": "Cannot send reminders for a class that has already ended"}
 
 
-@patch("app.apis.classes.SESEmailService")
+@patch("app.apis.class_reminder_resource.SESEmailService")
 def test_reminder_no_bookings(mock_ses, client, trainer_token, sample_class):
     """A class with no bookings should return 400."""
     resp = client.post(
@@ -168,7 +168,7 @@ def test_reminder_no_bookings(mock_ses, client, trainer_token, sample_class):
     assert resp.json == {"message": "No registered members for this class"}
 
 
-@patch("app.apis.classes.SESEmailService")
+@patch("app.apis.class_reminder_resource.SESEmailService")
 def test_reminder_sends_to_all_members(mock_ses, client, trainer_token, sample_bookings):
     """Reminders should be sent to all booked members and return 200."""
     resp = client.post(
@@ -188,7 +188,7 @@ def test_reminder_sends_to_all_members(mock_ses, client, trainer_token, sample_b
     assert "bob@test.com" in call_args
 
 
-@patch("app.apis.classes.SESEmailService")
+@patch("app.apis.class_reminder_resource.SESEmailService")
 def test_reminder_email_contains_class_details(mock_ses, client, trainer_token, sample_bookings):
     """The reminder email body should include the class title and location."""
     resp = client.post(

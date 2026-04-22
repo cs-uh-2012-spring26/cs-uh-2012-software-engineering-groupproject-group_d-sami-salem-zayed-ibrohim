@@ -3,6 +3,7 @@ from flask import request
 from flask_jwt_extended import create_access_token
 from http import HTTPStatus
 from app.db.users import BIRTHDAY, UserResource, EMAIL, PASSWORD, NAME, ROLE, ROLE_MEMBER, ROLE_TRAINER
+from app.services.auth_service import AuthService
 
 api = Namespace("auth", description="Authentication endpoints")
 
@@ -35,42 +36,7 @@ class Register(Resource):
     def post(self):
         """Register a new user (member or trainer)"""
         data = request.json
-        email = data.get(EMAIL)
-        password = data.get(PASSWORD)
-        name = data.get(NAME)
-        birthday = data.get(BIRTHDAY)
-        role = data.get(ROLE, ROLE_MEMBER)
-
-        print(f"Received registration data: {data}")  # Debugging log
-
-        if not all([email, password, name, birthday]):
-            return {"message": "Email, password, name, and birthday are required"}, HTTPStatus.BAD_REQUEST
-        if role not in [ROLE_MEMBER, ROLE_TRAINER]:
-            return {"message": "Invalid role. Must be 'member' or 'trainer'"}, HTTPStatus.BAD_REQUEST
-
-        user_resource = UserResource()
-        
-        # Check if user already exists
-        existing_user = user_resource.get_user_by_email(email)
-        if existing_user:
-            return {"message": "User already exists"}, HTTPStatus.BAD_REQUEST
-
-        # Create user
-        try:
-            user_id = user_resource.create_user(email, password, name, birthday, role)
-        except Exception as e:
-            # Handle duplicate key error from MongoDB unique index
-            if "duplicate key" in str(e).lower() or "E11000" in str(e):
-                return {"message": "User already exists"}, HTTPStatus.BAD_REQUEST
-            raise
-        
-        # Create access token
-        access_token = create_access_token(identity=email, additional_claims={"role": role, "user_id": str(user_id)})
-        
-        return {
-            "access_token": access_token,
-            "user": {"email": email, "name": name, "role": role, "_id": str(user_id)}
-        }, HTTPStatus.CREATED
+        return AuthService().register_user(data)
 
 
 @api.route("/login")

@@ -69,6 +69,24 @@ class ClassResource:
         })
         return overlapping is not None
 
+    def to_dict(self, cls: dict, remaining_spots: int = None) -> dict:
+        """Serialize a class document into a clean API-facing dictionary."""
+        result = {
+            "_id": cls.get("_id"),
+            TITLE: cls.get(TITLE),
+            TRAINER_ID: cls.get(TRAINER_ID),
+            TRAINER_NAME: cls.get(TRAINER_NAME),
+            START_DATE: cls.get(START_DATE),
+            END_DATE: cls.get(END_DATE),
+            CAPACITY: cls.get(CAPACITY),
+            LOCATION: cls.get(LOCATION),
+            DESCRIPTION: cls.get(DESCRIPTION),
+            CREATED_AT: cls.get(CREATED_AT),
+        }
+        if remaining_spots is not None:
+            result["remaining_spots"] = remaining_spots
+        return result
+
     def delete_all_classes(self):
         """Delete all classes (for testing)"""
         self.collection.delete_many({})
