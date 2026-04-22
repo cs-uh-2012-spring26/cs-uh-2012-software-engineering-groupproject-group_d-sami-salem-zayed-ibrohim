@@ -1,9 +1,9 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required
 from http import HTTPStatus
-from app.db.classes import ClassResource, TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION
-from app.db.bookings import BookingResource
+from app.db.classes import TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION
+from app.services.auth_context import get_authenticated_user
 from app.services.class_service import ClassService
 
 api = Namespace("classes", description="Class management endpoints")
@@ -27,7 +27,8 @@ class_response = api.model("ClassResponse", {
     CAPACITY: fields.Integer(description="Class capacity"),
     LOCATION: fields.String(description="Class location"),
     DESCRIPTION: fields.String(description="Class description"),
-    "created_at": fields.String(description="Creation timestamp")
+    "created_at": fields.String(description="Creation timestamp"),
+    "remaining_spots": fields.Integer(description="Open spots remaining for booking")
 })
 
 
@@ -42,22 +43,11 @@ class Classes(Resource):
     @jwt_required()
     def post(self):
         """Create a new fitness class (trainer only)"""
-        trainer_email = get_jwt_identity()
-        role = get_jwt().get("role")
+        auth_user = get_authenticated_user()
         data = request.json
-        return ClassService().create_class(trainer_email, role, data)
+        return ClassService().create_class(auth_user.email, auth_user.role, data)
 
     @api.response(HTTPStatus.OK, "Upcoming classes retrieved successfully", [class_response])
     def get(self):
         """Get all upcoming classes (any user)"""
-        class_resource = ClassResource()
-        booking_resource = BookingResource()
-        upcoming_classes = class_resource.get_upcoming_classes()
-        result = []
-        for cls in upcoming_classes:
-            class_id = str(cls.get("_id"))
-            capacity = cls.get(CAPACITY, 0)
-            booked_count = booking_resource.count_member_bookings(class_id)
-            remaining_spots = max(capacity - booked_count, 0)
-            result.append(class_resource.to_dict(cls, remaining_spots))
-        return result, HTTPStatus.OK
+        return ClassService().get_upcoming_classes()

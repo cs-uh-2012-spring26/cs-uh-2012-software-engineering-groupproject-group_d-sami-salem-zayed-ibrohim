@@ -18,7 +18,7 @@ def create_app():
     app.config.from_object(Config)
 
     DB.init_app(app)
-    jwt = JWTManager(app)
+    JWTManager(app)
 
     authorizations = {
         'Bearer': {
