@@ -1,8 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from flask_jwt_extended import create_access_token
 from http import HTTPStatus
-from app.db.users import BIRTHDAY, UserResource, EMAIL, PASSWORD, NAME, ROLE, ROLE_MEMBER, ROLE_TRAINER
+from app.db.users import BIRTHDAY, EMAIL, PASSWORD, NAME, ROLE, ROLE_MEMBER, ROLE_TRAINER
 from app.services.auth_service import AuthService
 
 api = Namespace("auth", description="Authentication endpoints")
@@ -46,29 +45,4 @@ class Login(Resource):
     @api.response(HTTPStatus.UNAUTHORIZED, "Invalid credentials")
     def post(self):
         """Login and receive JWT token"""
-        data = request.json
-        email = data.get(EMAIL)
-        password = data.get(PASSWORD)
-
-        if not all([email, password]):
-            return {"message": "Email and password are required"}, HTTPStatus.BAD_REQUEST
-
-        user_resource = UserResource()
-        user = user_resource.verify_password(email, password)
-
-        if not user:
-            return {"message": "Invalid email or password"}, HTTPStatus.UNAUTHORIZED
-
-        # Create access token
-        access_token = create_access_token(
-            identity=email, 
-            additional_claims={"role": user[ROLE], "user_id": user["_id"]}
-        )
-        
-        # Remove password from response
-        user.pop(PASSWORD, None)
-        
-        return {
-            "access_token": access_token,
-            "user": user
-        }, HTTPStatus.OK
+        return AuthService().login_user(request.json)

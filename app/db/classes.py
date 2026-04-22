@@ -1,5 +1,6 @@
 from app.db.utils import serialize_item, serialize_items
 from app.db import DB
+from collections.abc import Mapping
 from datetime import datetime
 from bson import ObjectId
 
@@ -23,21 +24,9 @@ class ClassResource:
     def __init__(self):
         self.collection = DB.get_collection(CLASS_COLLECTION)
 
-    def create_class(self, title: str, trainer_id: str, trainer_name: str, 
-                     start_date: datetime, end_date: datetime, capacity: int, 
-                     location: str, description: str):
-        """Create a new fitness class"""
-        fitness_class = {
-            TITLE: title,
-            TRAINER_ID: trainer_id,
-            TRAINER_NAME: trainer_name,
-            START_DATE: start_date,
-            END_DATE: end_date,
-            CAPACITY: capacity,
-            LOCATION: location,
-            DESCRIPTION: description,
-            CREATED_AT: datetime.now()
-        }
+    def create_class(self, class_data=None, **legacy_fields):
+        """Create a new fitness class from a single payload object or dict."""
+        fitness_class = self._normalize_class_data(class_data, legacy_fields)
         result = self.collection.insert_one(fitness_class)
         return result.inserted_id
 
@@ -69,6 +58,12 @@ class ClassResource:
         })
         return overlapping is not None
 
+    def get_class_id(self, cls: dict) -> str:
+        return str(cls.get("_id"))
+
+    def get_capacity(self, cls: dict) -> int:
+        return cls.get(CAPACITY, 0)
+
     def to_dict(self, cls: dict, remaining_spots: int = None) -> dict:
         """Serialize a class document into a clean API-facing dictionary."""
         result = {
@@ -86,6 +81,20 @@ class ClassResource:
         if remaining_spots is not None:
             result["remaining_spots"] = remaining_spots
         return result
+
+    def _normalize_class_data(self, class_data, legacy_fields):
+        payload = class_data if class_data is not None else legacy_fields
+
+        if hasattr(payload, "to_document"):
+            return payload.to_document()
+
+        if isinstance(payload, Mapping):
+            document = dict(payload)
+        else:
+            raise TypeError("class_data must be a mapping or provide to_document()")
+
+        document.setdefault(CREATED_AT, datetime.now())
+        return document
 
     def delete_all_classes(self):
         """Delete all classes (for testing)"""

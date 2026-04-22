@@ -1,7 +1,8 @@
 from flask_restx import Resource, fields
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required
 from http import HTTPStatus
 from app.db.bookings import USER_NAME, USER_EMAIL, BOOKING_TIME
+from app.services.auth_context import get_authenticated_user
 from app.services.class_members_service import ClassMembersService
 from app.apis.class_resource import api
 
@@ -21,9 +22,9 @@ class ClassMembers(Resource):
     @jwt_required()
     def get(self, class_id):
         """Get members who booked a class (trainer of the class only)"""
-        claims = get_jwt()
+        auth_user = get_authenticated_user()
         return ClassMembersService().get_class_members(
             class_id=class_id,
-            user_id=claims.get("user_id"),
-            role=claims.get("role")
+            user_id=auth_user.user_id,
+            role=auth_user.role
         )

@@ -41,3 +41,26 @@ class AuthService:
             "access_token": access_token,
             "user": {"email": email, "name": name, "role": role, "_id": str(user_id)}
         }, HTTPStatus.CREATED
+
+    def login_user(self, data: dict):
+        """Validate credentials and return a JWT token for an existing user."""
+        email = data.get(EMAIL)
+        password = data.get(PASSWORD)
+
+        if not all([email, password]):
+            return {"message": "Email and password are required"}, HTTPStatus.BAD_REQUEST
+
+        user = self.user_resource.verify_password(email, password)
+        if not user:
+            return {"message": "Invalid email or password"}, HTTPStatus.UNAUTHORIZED
+
+        access_token = create_access_token(
+            identity=email,
+            additional_claims={"role": user[ROLE], "user_id": user["_id"]}
+        )
+
+        user.pop(PASSWORD, None)
+        return {
+            "access_token": access_token,
+            "user": user
+        }, HTTPStatus.OK

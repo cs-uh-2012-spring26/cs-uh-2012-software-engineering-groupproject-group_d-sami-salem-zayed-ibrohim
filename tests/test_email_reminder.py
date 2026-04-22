@@ -180,10 +180,10 @@ def test_reminder_sends_to_all_members(mock_ses, client, trainer_token, sample_b
 
     # Verify the email service was called once per member (Alice and Bob)
     mock_instance = mock_ses.return_value
-    assert mock_instance.send_email.call_count == 2
+    assert mock_instance.send_notification.call_count == 2
 
     # Check that the correct recipient emails were used
-    call_args = [call[0][0] for call in mock_instance.send_email.call_args_list]
+    call_args = [call[0][0] for call in mock_instance.send_notification.call_args_list]
     assert "alice@test.com" in call_args
     assert "bob@test.com" in call_args
 
@@ -199,7 +199,7 @@ def test_reminder_email_contains_class_details(mock_ses, client, trainer_token, 
 
     # Check the email body of the first call
     mock_instance = mock_ses.return_value
-    first_call_body = mock_instance.send_email.call_args_list[0][0][2]
+    first_call_body = mock_instance.send_notification.call_args_list[0][0][2]
     assert "Yoga Basics" in first_call_body
     assert "Studio A" in first_call_body
 

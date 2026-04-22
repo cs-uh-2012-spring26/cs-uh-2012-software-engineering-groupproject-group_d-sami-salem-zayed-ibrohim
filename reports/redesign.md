@@ -14,10 +14,9 @@ We created `app/services/class_service.py` containing a `ClassService` class. Al
 
 ```python
 def post(self):
-    trainer_email = get_jwt_identity()
-    role = get_jwt().get("role")
+    auth_user = get_authenticated_user()
     data = request.json
-    return ClassService().create_class(trainer_email, role, data)
+    return ClassService().create_class(auth_user.email, auth_user.role, data)
 ```
 
 The same violation existed in `booking.py` (`Bookings.post()` and `MyBookedClasses.get()`) and `class_members_resource.py` (`ClassMembers.get()`). We fixed those by extracting `BookingService` and `ClassMembersService` using the same approach.
@@ -112,13 +111,113 @@ Before the refactoring, the `apis/` layer mixed all three responsibilities. Afte
 
 ### Code Smell Fixes
 
-[To be added by Ibrohim]
+#### 1. Long Method
+
+**What was wrong:**
+The Sprint 3A report identified `Classes.post()` in `app/apis/classes.py` as a long method because it mixed authentication, request parsing, validation, date parsing, conflict checking, persistence, and response formatting in one route handler.
+
+**How we fixed it:**
+This smell was removed as part of the abstraction refactor above. The logic now lives in `ClassService.create_class()`, while the route in `app/apis/class_resource.py` is only a thin controller that reads the request and delegates to the service.
+
+**New structure:**
+`app/apis/class_resource.py`, `app/services/class_service.py`
+
+#### 2. Dead Code
+
+**What was wrong:**
+Sprint 3A identified `jwt = JWTManager(app)` in `app/__init__.py` as dead code because the assignment was never used after initialization.
+
+**How we fixed it:**
+We removed the unused variable and kept only the required side effect:
+
+```python
+JWTManager(app)
+```
+
+This keeps the JWT extension initialized without leaving misleading unused state behind.
+
+**New structure:**
+`app/__init__.py`
+
+#### 3. Primitive Obsession
+
+**What was wrong:**
+The class-creation flow handled start and end times as raw strings and repeatedly parsed them with `datetime.strptime(...)`. This scattered date rules across the service logic and made validation harder to reuse.
+
+**How we fixed it:**
+We introduced two small value objects in `app/services/class_models.py`:
+
+- `ClassSchedule` owns date parsing and temporal validation.
+- `CreateClassRequest` owns request validation and converts the raw payload into typed data.
+
+`ClassService.create_class()` now works with those objects instead of manually juggling primitive date strings. We also reused `ClassSchedule.parse_datetime()` inside `ReminderService` so date parsing is centralized in one place.
+
+**New structure:**
+`app/services/class_models.py`, `app/services/class_service.py`, `app/services/reminder_service.py`
+
+#### 4. Long Parameter List
+
+**What was wrong:**
+Sprint 3A flagged `ClassResource.create_class(...)` in `app/db/classes.py` because it required eight separate parameters: title, trainer_id, trainer_name, start_date, end_date, capacity, location, and description.
+
+**How we fixed it:**
+We changed the database method to accept a single payload object or mapping:
+
+```python
+def create_class(self, class_data=None, **legacy_fields):
+    fitness_class = self._normalize_class_data(class_data, legacy_fields)
+    result = self.collection.insert_one(fitness_class)
+```
+
+The service now passes a `ClassRecord` object created from the validated request data. This keeps the method signature short and makes it easier to evolve the stored class shape later.
+
+**New structure:**
+`app/db/classes.py`, `app/services/class_models.py`, `app/services/class_service.py`
+
+#### 5. Duplicate Code
+
+**What was wrong:**
+Sprint 3A identified repeated JWT-claim extraction logic across multiple route handlers in `classes.py` and `booking.py`. The same pattern was later still present across `class_resource.py`, `booking.py`, `class_members_resource.py`, and `class_reminder_resource.py`.
+
+**How we fixed it:**
+We introduced a shared helper in `app/services/auth_context.py`:
+
+```python
+auth_user = get_authenticated_user()
+```
+
+This returns one `AuthenticatedUser` object containing `user_id`, `role`, and `email`. Protected routes now use that helper instead of manually calling `get_jwt()` and `get_jwt_identity()` in each file. We also moved `Login.post()` behind `AuthService.login_user()` so the auth endpoints follow the same thin-route design.
+
+**New structure:**
+`app/services/auth_context.py`, `app/apis/class_resource.py`, `app/apis/booking.py`, `app/apis/class_members_resource.py`, `app/apis/class_reminder_resource.py`, `app/apis/auth.py`, `app/services/auth_service.py`
 
 ---
 
 ## 2. Design Patterns Used
 
-[To be added]
+### Strategy Pattern for Notifications
+
+Feature 7 requires the system to support email and Telegram now, while also making it easy to add future channels such as SMS or WhatsApp later. That means the reminder workflow should not depend directly on one concrete delivery mechanism.
+
+We used the Strategy pattern for notification delivery:
+
+- `NotificationService` defines the common `send_notification(...)` interface.
+- `EmailService` adapts email-specific behavior to that generic notification interface.
+- `SESEmailService` is a concrete strategy that sends notifications through AWS SES.
+- `ReminderService` depends on the abstraction and calls `send_notification(...)` without knowing which concrete delivery strategy is being used.
+
+This gives us two important benefits:
+
+1. `ReminderService` is closed for modification when a new notification channel is added.
+2. New channels can be introduced by creating another implementation, for example `TelegramNotificationService`, without rewriting the reminder workflow.
+
+In other words, the redesign now follows the extensibility requirement from Sprint 3B: adding a new notification channel means adding a new strategy class instead of editing reminder business logic.
+
+### Value Objects for Class Creation
+
+We also introduced `ClassSchedule` and `CreateClassRequest` as value objects for the class-creation flow. These objects centralize validation and date handling, which makes the code easier to maintain as recurring classes are added in Feature 6.
+
+Although the main GoF pattern used here is Strategy, these value objects were an important supporting refactor because they removed primitive date handling from the route/service logic and gave us a cleaner foundation for future schedule-related behavior.
 
 ---
 

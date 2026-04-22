@@ -1,8 +1,9 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required
 from http import HTTPStatus
 from app.db.bookings import CLASS_ID
+from app.services.auth_context import get_authenticated_user
 from app.services.booking_service import BookingService
 
 api = Namespace("bookings", description="Booking management endpoints")
@@ -35,12 +36,11 @@ class Bookings(Resource):
     @jwt_required()
     def post(self):
         """Create a new booking for a class (members only)"""
-        claims = get_jwt()
-        user_email = get_jwt_identity()
+        auth_user = get_authenticated_user()
         return BookingService().create_booking(
-            user_id=claims.get("user_id"),
-            user_email=user_email,
-            role=claims.get("role"),
+            user_id=auth_user.user_id,
+            user_email=auth_user.email,
+            role=auth_user.role,
             data=request.json
         )
 
@@ -58,8 +58,8 @@ class MyBookedClasses(Resource):
     @jwt_required()
     def get(self):
         """Retrieve all classes booked by the currently logged-in member."""
-        claims = get_jwt()
+        auth_user = get_authenticated_user()
         return BookingService().get_member_bookings(
-            user_id=claims.get("user_id"),
-            role=claims.get("role")
+            user_id=auth_user.user_id,
+            role=auth_user.role
         )
