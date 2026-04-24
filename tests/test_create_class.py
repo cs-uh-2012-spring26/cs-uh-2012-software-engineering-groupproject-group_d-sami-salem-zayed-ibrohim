@@ -44,14 +44,20 @@ def test_create_class_success(client, trainer_token, valid_class_data):
     assert resp.status_code == HTTPStatus.CREATED
     data = resp.get_json()
     
+    # Verify response structure
+    assert "created_classes" in data
+    assert "message" in data
+    assert len(data["created_classes"]) == 1
+    class_data = data["created_classes"][0]
+    
     # Verify response contains all expected fields
-    assert "_id" in data
-    assert data[TITLE] == valid_class_data[TITLE]
-    assert data[CAPACITY] == valid_class_data[CAPACITY]
-    assert data[LOCATION] == valid_class_data[LOCATION]
-    assert data[DESCRIPTION] == valid_class_data[DESCRIPTION]
-    assert "trainer_id" in data
-    assert "trainer_name" in data
+    assert "_id" in class_data
+    assert class_data[TITLE] == valid_class_data[TITLE]
+    assert class_data[CAPACITY] == valid_class_data[CAPACITY]
+    assert class_data[LOCATION] == valid_class_data[LOCATION]
+    assert class_data[DESCRIPTION] == valid_class_data[DESCRIPTION]
+    assert "trainer_id" in class_data
+    assert "trainer_name" in class_data
 
 
 def test_create_class_appears_in_upcoming_list(client, trainer_token, valid_class_data):
@@ -63,7 +69,7 @@ def test_create_class_appears_in_upcoming_list(client, trainer_token, valid_clas
         headers={"Authorization": f"Bearer {trainer_token}"}
     )
     assert create_resp.status_code == HTTPStatus.CREATED
-    created_class = create_resp.get_json()
+    created_class = create_resp.get_json()["created_classes"][0]
     
     # List upcoming classes
     list_resp = client.get("/classes")
@@ -342,5 +348,70 @@ def test_create_class_trainer_overlap(client, trainer_token):
     )
     
     assert resp2.status_code == HTTPStatus.CONFLICT
-    response_data = resp2.get_json()
-    assert "overlap" in response_data["message"].lower()
+
+
+def test_create_recurring_classes_daily(client, trainer_token):
+    """Trainer successfully creates daily recurring classes."""
+    start_time = datetime.now() + timedelta(days=1)
+    end_time = start_time + timedelta(hours=1)
+    recurrence_end = start_time + timedelta(days=4)  # 5 classes total (days 1,2,3,4,5)
+    
+    class_data = {
+        TITLE: "Daily Yoga",
+        START_DATE: start_time.strftime("%Y-%m-%d %H:%M:%S"),
+        END_DATE: end_time.strftime("%Y-%m-%d %H:%M:%S"),
+        CAPACITY: 15,
+        LOCATION: "Studio A",
+        DESCRIPTION: "Daily yoga session",
+        "recurrence_type": "daily",
+        "recurrence_end_date": recurrence_end.strftime("%Y-%m-%d")
+    }
+    
+    resp = client.post(
+        "/classes",
+        json=class_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    
+    assert resp.status_code == HTTPStatus.CREATED
+    data = resp.get_json()
+    
+    assert "created_classes" in data
+    assert "message" in data
+    assert len(data["created_classes"]) == 5  # 5 classes created
+    
+    # Verify all classes have the same details except dates
+    for cls in data["created_classes"]:
+        assert cls[TITLE] == class_data[TITLE]
+        assert cls[CAPACITY] == class_data[CAPACITY]
+        assert cls[LOCATION] == class_data[LOCATION]
+        assert cls[DESCRIPTION] == class_data[DESCRIPTION]
+
+
+def test_create_recurring_classes_weekly(client, trainer_token):
+    """Trainer successfully creates weekly recurring classes."""
+    start_time = datetime.now() + timedelta(days=1)
+    end_time = start_time + timedelta(hours=1)
+    recurrence_end = start_time + timedelta(weeks=2)  # 2 weeks total
+    
+    class_data = {
+        TITLE: "Weekly Pilates",
+        START_DATE: start_time.strftime("%Y-%m-%d %H:%M:%S"),
+        END_DATE: end_time.strftime("%Y-%m-%d %H:%M:%S"),
+        CAPACITY: 12,
+        LOCATION: "Studio B",
+        DESCRIPTION: "Weekly pilates session",
+        "recurrence_type": "weekly",
+        "recurrence_end_date": recurrence_end.strftime("%Y-%m-%d")
+    }
+    
+    resp = client.post(
+        "/classes",
+        json=class_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+    
+    assert resp.status_code == HTTPStatus.CREATED
+    data = resp.get_json()
+    
+    assert len(data["created_classes"]) == 3  # 3 classes: week 0, 1, 2

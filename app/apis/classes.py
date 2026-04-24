@@ -7,6 +7,7 @@ from app.db.users import UserResource, ROLE_TRAINER, NAME
 from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME, CLASS_ID
 from datetime import datetime
 from app.config import Config
+from app.services.class_creation_service import ClassCreationService, OverlapError
 
 api = Namespace("classes", description="Class management endpoints")
 
@@ -17,7 +18,9 @@ create_class_model = api.model("CreateClass", {
     END_DATE: fields.String(required=True, description="Class end date (YYYY-MM-DD HH:MM:SS)", example="2026-03-01 11:00:00"),
     CAPACITY: fields.Integer(required=True, description="Class capacity", example=20),
     LOCATION: fields.String(required=True, description="Class location", example="Studio A"),
-    DESCRIPTION: fields.String(required=True, description="Class description", example="A beginner-friendly yoga class")
+    DESCRIPTION: fields.String(required=True, description="Class description", example="A beginner-friendly yoga class"),
+    "recurrence_type": fields.String(required=False, description="Recurrence type: none, daily, weekly, monthly", example="daily"),
+    "recurrence_end_date": fields.String(required=False, description="End date for recurrence (YYYY-MM-DD)", example="2026-03-31")
 })
 
 class_response = api.model("ClassResponse", {
@@ -33,6 +36,11 @@ class_response = api.model("ClassResponse", {
     "created_at": fields.String(description="Creation timestamp")
 })
 
+created_classes_response = api.model("CreatedClassesResponse", {
+    "created_classes": fields.List(fields.Nested(class_response), description="List of created classes"),
+    "message": fields.String(description="Success message")
+})
+
 member_response = api.model("MemberResponse", {
     USER_NAME: fields.String(description="Member name"),
     USER_EMAIL: fields.String(description="Member email"),
@@ -43,14 +51,14 @@ member_response = api.model("MemberResponse", {
 @api.route("")
 class Classes(Resource):
     @api.expect(create_class_model)
-    @api.response(HTTPStatus.CREATED, "Class created successfully", class_response)
+    @api.response(HTTPStatus.CREATED, "Class(es) created successfully", created_classes_response)
     @api.response(HTTPStatus.BAD_REQUEST, "Invalid input or validation error")
     @api.response(HTTPStatus.UNAUTHORIZED, "Unauthorized - Trainer role required")
     @api.response(HTTPStatus.CONFLICT, "Trainer has overlapping classes")
     @api.doc(security='Bearer')
     @jwt_required()
     def post(self):
-        """Create a new fitness class (trainer only)"""
+        """Create a new fitness class or recurring classes (trainer only)"""
         # Get JWT claims
         claims = get_jwt()
         role = claims.get("role")
@@ -62,68 +70,37 @@ class Classes(Resource):
 
         # Parse request body
         data = request.json
-        title = data.get(TITLE)
-        start_date_str = data.get(START_DATE)
-        end_date_str = data.get(END_DATE)
-        capacity = data.get(CAPACITY)
-        location = data.get(LOCATION)
-        description = data.get(DESCRIPTION)
 
         # Validate required fields
-        if not all([title, start_date_str, end_date_str, capacity is not None, location, description]):
+        required_fields = [TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION]
+        if not all(data.get(field) is not None for field in required_fields):
             return {"message": "All fields are required: title, start_date, end_date, capacity, location, description"}, HTTPStatus.BAD_REQUEST
 
         # Validate capacity
-        if capacity <= 0:
+        if data[CAPACITY] <= 0:
             return {"message": "Capacity must be greater than 0"}, HTTPStatus.BAD_REQUEST
 
-        # Parse dates
+        # Set default recurrence_type if not provided
+        if "recurrence_type" not in data:
+            data["recurrence_type"] = "none"
+
+        # Use the service to create classes
+        service = ClassCreationService()
         try:
-            start_date = datetime.strptime(start_date_str, "%Y-%m-%d %H:%M:%S")
-            end_date = datetime.strptime(end_date_str, "%Y-%m-%d %H:%M:%S")
-        except ValueError:
-            return {"message": "Invalid date format. Use YYYY-MM-DD HH:MM:SS"}, HTTPStatus.BAD_REQUEST
+            created_ids = service.create_class(trainer_email, data)
+        except OverlapError as e:
+            return {"message": str(e)}, HTTPStatus.CONFLICT
+        except ValueError as e:
+            return {"message": str(e)}, HTTPStatus.BAD_REQUEST
 
-        # Validate dates
-        now = datetime.now()
-        if start_date < now:
-            return {"message": "Start date cannot be in the past"}, HTTPStatus.BAD_REQUEST
-        if end_date < now:
-            return {"message": "End date cannot be in the past"}, HTTPStatus.BAD_REQUEST
-        if end_date <= start_date:
-            return {"message": "End date must be after start date"}, HTTPStatus.BAD_REQUEST
-
-        # Get trainer info from database using email
-        user_resource = UserResource()
-        trainer = user_resource.get_user_by_email(trainer_email)
-        
-        if not trainer:
-            return {"message": "Trainer not found"}, HTTPStatus.BAD_REQUEST
-        
-        trainer_id = trainer.get("_id")
-        trainer_name = trainer.get(NAME)
-
-        # Check for overlapping classes
+        # Get the created classes
         class_resource = ClassResource()
-        if class_resource.check_trainer_overlap(trainer_id, start_date, end_date):
-            return {"message": "Trainer has overlapping classes at this time"}, HTTPStatus.CONFLICT
+        created_classes = [class_resource.get_class_by_id(str(cid)) for cid in created_ids]
 
-        # Create class
-        class_id = class_resource.create_class(
-            title=title,
-            trainer_id=trainer_id,
-            trainer_name=trainer_name,
-            start_date=start_date,
-            end_date=end_date,
-            capacity=capacity,
-            location=location,
-            description=description
-        )
-
-        # Get created class
-        created_class = class_resource.get_class_by_id(str(class_id))
-        
-        return created_class, HTTPStatus.CREATED
+        return {
+            "created_classes": created_classes,
+            "message": f"{'Class' if len(created_classes) == 1 else 'Classes'} created successfully"
+        }, HTTPStatus.CREATED
 
 
     # Implementing Feature 2
