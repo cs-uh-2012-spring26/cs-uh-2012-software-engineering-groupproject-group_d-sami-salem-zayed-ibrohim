@@ -30,18 +30,25 @@ class ClassService:
         trainer_id = trainer.get("_id")
         trainer_name = trainer.get(NAME)
 
-        if self.class_resource.check_trainer_overlap(
-            trainer_id,
-            class_request.schedule.start_date,
-            class_request.schedule.end_date,
-        ):
-            return {"message": "Trainer has overlapping classes at this time"}, HTTPStatus.CONFLICT
+        class_records = class_request.to_records(trainer_id=trainer_id, trainer_name=trainer_name)
 
-        class_record = class_request.to_record(trainer_id=trainer_id, trainer_name=trainer_name)
-        class_id = self.class_resource.create_class(class_record)
+        for record in class_records:
+            if self.class_resource.check_trainer_overlap(
+                trainer_id,
+                record.start_date,
+                record.end_date,
+            ):
+                return {"message": "Trainer has overlapping classes at this time"}, HTTPStatus.CONFLICT
 
-        created_class = self.class_resource.get_class_by_id(str(class_id))
-        return created_class, HTTPStatus.CREATED
+        created_classes = []
+        for record in class_records:
+            class_id = self.class_resource.create_class(record)
+            created_classes.append(self.class_resource.get_class_by_id(str(class_id)))
+
+        if len(created_classes) == 1:
+            return created_classes[0], HTTPStatus.CREATED
+
+        return created_classes, HTTPStatus.CREATED
 
     def get_upcoming_classes(self):
         """Return upcoming classes with remaining spots for the list endpoint."""
