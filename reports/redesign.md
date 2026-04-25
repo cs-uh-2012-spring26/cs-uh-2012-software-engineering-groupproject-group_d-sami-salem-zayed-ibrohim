@@ -240,7 +240,7 @@ Although the main GoF pattern used here is Strategy, these value objects were an
 
 ## 3. Updated Class Diagram
 
-[To be added by Zayed]
+<img width="7992" height="6204" alt="SoftwareEngineering_ClassDiagram_Sprint3B-Copy of Copy of Copy of Copy of Copy of Copy of Copy of FormattedandDataTypeDefinedSprint3B drawio" src="https://github.com/user-attachments/assets/a46a4f30-dca4-4429-b2cd-fea30670ccdd" />
 
 ---
 
