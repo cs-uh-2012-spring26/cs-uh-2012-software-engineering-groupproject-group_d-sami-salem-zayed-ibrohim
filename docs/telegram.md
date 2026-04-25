@@ -5,6 +5,7 @@ Use this guide to test Telegram reminders. I have set up a toy bot, but you can 
 ## 1. Configure the Bot Token
 
 1. Create your own bot using https://t.me/BotFather
+2. Start the bot from your account! Very important, without this the bot will not be able to send any messages to you.
 2. After configuring a new bot, BotFather will provide you with API key to the bot. 
 3. Paste it to the  `.env` file as shown below
 
@@ -40,12 +41,12 @@ curl -X POST http://127.0.0.1:8000/auth/register \
   -d '{"email":"trainer_telegram@test.com","password":"password123","name":"Telegram Trainer","birthday":"1990-01-01","role":"trainer"}'
 ```
 
-Register a member and copy the returned `access_token` as `MEMBER_TOKEN`:
+On a new terminal, register a member and copy the returned `access_token` as `MEMBER_TOKEN`:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"member_telegram@test.com","password":"password123","name":"Telegram Member","birthday":"2000-01-01","role":"member"}'
+  -d '{"email":"member_telegramm@test.com","password":"password123","name":"Telegram Member","birthday":"2000-01-01","role":"member"}'
 ```
 
 ## 5. Create and Book a Future Class
