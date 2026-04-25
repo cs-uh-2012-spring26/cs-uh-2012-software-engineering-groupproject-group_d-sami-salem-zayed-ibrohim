@@ -65,7 +65,7 @@ Create a `.env` file in the root directory of your project. Here is a sample .en
     DEBUG="true"
     JWT_SECRET_KEY="9f8c1e5a6b4d3c2e1a9b8f7d6c5e4a3b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4"
     SES_SENDER_EMAIL="NYUAD.GYM@gmail.com"
-    TELEGRAM_BOT_TOKEN=""
+    TELEGRAM_BOT_TOKEN="8670047534:AAHUR77K0NGOXBAX2m4KmBFVuQlkDxVfv6U"
 
 > Note: This assumes you have an active, production-grade AWS account with Amazon SES email functionality enabled. For more information, check out this: [Link](https://aws.amazon.com/ses/).
 > Telegram reminders require a Telegram bot token. Leave `TELEGRAM_BOT_TOKEN` empty if you only use email reminders.
