@@ -100,21 +100,7 @@ in your terminal. You can also see a visual report by viewing
 
 Members can configure reminders per booking. New bookings default to email-only reminders:
 
-    {
-      "channels": ["email"],
-      "telegram_chat_id": null
-    }
-
-To update a booking's reminder channels, send:
-
-    PATCH /bookings/<booking_id>/notifications
-    Authorization: Bearer <member_token>
-    Content-Type: application/json
-
-    {
-      "channels": ["email", "telegram"],
-      "telegram_chat_id": "123456789"
-    }
+Instructions on how to use the feature on your machine can be found at [docs/telegram.md](docs/telegram.md)
 
 Rules:
 
