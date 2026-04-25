@@ -6,8 +6,8 @@ Use this guide to test Telegram reminders. I have set up a toy bot, but you can 
 
 1. Create your own bot using https://t.me/BotFather
 2. Start the bot from your account! Very important, without this the bot will not be able to send any messages to you.
-2. After configuring a new bot, BotFather will provide you with API key to the bot. 
-3. Paste it to the  `.env` file as shown below
+3. After configuring a new bot, BotFather will provide you with API key to the bot. 
+4. Paste it to the  `.env` file as shown below
 
 Set the bot token locally in `.env`:
 
