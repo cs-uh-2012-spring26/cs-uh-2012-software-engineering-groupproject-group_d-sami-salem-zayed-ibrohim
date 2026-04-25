@@ -2,7 +2,19 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from flask_jwt_extended import jwt_required
 from http import HTTPStatus
-from app.db.classes import TITLE, START_DATE, END_DATE, CAPACITY, LOCATION, DESCRIPTION
+from app.db.classes import (
+    CAPACITY,
+    CREATED_AT,
+    DESCRIPTION,
+    END_DATE,
+    LOCATION,
+    REMAINING_SPOTS,
+    START_DATE,
+    TITLE,
+    TRAINER_ID,
+    TRAINER_NAME,
+)
+from app.db.constants import ID
 from app.services.auth_context import get_authenticated_user
 from app.services.class_service import ClassService
 
@@ -33,17 +45,17 @@ create_class_model = api.model("CreateClass", {
 })
 
 class_response = api.model("ClassResponse", {
-    "_id": fields.String(description="Class ID"),
+    ID: fields.String(description="Class ID"),
     TITLE: fields.String(description="Class title"),
-    "trainer_id": fields.String(description="Trainer ID"),
-    "trainer_name": fields.String(description="Trainer name"),
+    TRAINER_ID: fields.String(description="Trainer ID"),
+    TRAINER_NAME: fields.String(description="Trainer name"),
     START_DATE: fields.String(description="Class start date"),
     END_DATE: fields.String(description="Class end date"),
     CAPACITY: fields.Integer(description="Class capacity"),
     LOCATION: fields.String(description="Class location"),
     DESCRIPTION: fields.String(description="Class description"),
-    "created_at": fields.String(description="Creation timestamp"),
-    "remaining_spots": fields.Integer(description="Open spots remaining for booking")
+    CREATED_AT: fields.String(description="Creation timestamp"),
+    REMAINING_SPOTS: fields.Integer(description="Open spots remaining for booking")
 })
 
 

@@ -2,7 +2,8 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from flask_jwt_extended import jwt_required
 from http import HTTPStatus
-from app.db.bookings import CLASS_ID
+from app.db.bookings import BOOKING_TIME, CLASS_ID, IS_TRAINER, USER_EMAIL, USER_ID, USER_NAME
+from app.db.constants import ID
 from app.services.auth_context import get_authenticated_user
 from app.services.booking_service import BookingService
 
@@ -14,13 +15,13 @@ create_booking_model = api.model("CreateBooking", {
 })
 
 booking_response = api.model("BookingResponse", {
-    "_id": fields.String(description="Booking ID"),
+    ID: fields.String(description="Booking ID"),
     CLASS_ID: fields.String(description="Class ID"),
-    "user_id": fields.String(description="User ID"),
-    "user_email": fields.String(description="User email"),
-    "user_name": fields.String(description="User name"),
-    "booking_time": fields.String(description="Booking timestamp"),
-    "is_trainer": fields.Boolean(description="Whether the user is a trainer")
+    USER_ID: fields.String(description="User ID"),
+    USER_EMAIL: fields.String(description="User email"),
+    USER_NAME: fields.String(description="User name"),
+    BOOKING_TIME: fields.String(description="Booking timestamp"),
+    IS_TRAINER: fields.Boolean(description="Whether the user is a trainer")
 })
 
 
