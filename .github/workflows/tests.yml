@@ -21,6 +21,7 @@ jobs:
       DEBUG: ${{ secrets.DEBUG }}
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
       SES_SENDER_EMAIL: ${{ secrets.SES_SENDER_EMAIL }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     steps:
       - name: Checkout repository

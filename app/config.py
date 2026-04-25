@@ -17,6 +17,11 @@ def get_required_environ(name: str) -> str:
     return value
 
 
+def get_optional_environ(name: str, default: str = "") -> str:
+    load_dotenv()
+    return environ.get(name, default)
+
+
 class Config(object):
     MONGO_URI = get_required_environ("MONGO_URI")
     DB_NAME = get_required_environ("DB_NAME")
@@ -24,4 +29,4 @@ class Config(object):
     DEBUG = get_required_environ("DEBUG").lower() == "true"
     JWT_SECRET_KEY = get_required_environ("JWT_SECRET_KEY")
     SES_SENDER_EMAIL = get_required_environ("SES_SENDER_EMAIL")
-
+    TELEGRAM_BOT_TOKEN = get_optional_environ("TELEGRAM_BOT_TOKEN")

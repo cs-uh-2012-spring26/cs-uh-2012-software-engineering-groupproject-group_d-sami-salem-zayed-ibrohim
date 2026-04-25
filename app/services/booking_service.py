@@ -1,5 +1,15 @@
 from http import HTTPStatus
-from app.db.bookings import BookingResource, CLASS_ID, USER_EMAIL
+from app.db.bookings import (
+    BookingResource,
+    CHANNEL_EMAIL,
+    CHANNEL_TELEGRAM,
+    CHANNELS,
+    CLASS_ID,
+    NOTIFICATION_PREFERENCES,
+    TELEGRAM_CHAT_ID,
+    USER_EMAIL,
+    USER_ID,
+)
 from app.db.classes import ClassResource, CAPACITY
 from app.db.users import UserResource, ROLE_MEMBER, ROLE_TRAINER, NAME
 
@@ -86,8 +96,63 @@ class BookingService:
             "message": "Booking created successfully",
             "booking_id": str(booking_id),
             CLASS_ID: class_id,
-            USER_EMAIL: user_email
+            USER_EMAIL: user_email,
+            NOTIFICATION_PREFERENCES: {
+                CHANNELS: [CHANNEL_EMAIL],
+                TELEGRAM_CHAT_ID: None,
+            },
         }, HTTPStatus.CREATED
+
+    def update_notification_preferences(self, booking_id: str, user_id: str, role: str, data: dict):
+        """Update notification preferences for a member's booking."""
+        if role != ROLE_MEMBER:
+            return {"message": "Only members can configure booking notifications"}, HTTPStatus.FORBIDDEN
+
+        if not user_id:
+            return {"message": "Invalid authentication token"}, HTTPStatus.UNAUTHORIZED
+
+        booking = self.booking_resource.get_booking_by_id(booking_id)
+        if not booking:
+            return {"message": "Booking not found"}, HTTPStatus.NOT_FOUND
+
+        if booking.get(USER_ID) != user_id:
+            return {"message": "Forbidden: Cannot update another member's booking"}, HTTPStatus.FORBIDDEN
+
+        preferences, error = self._build_notification_preferences(data)
+        if error:
+            return error
+
+        self.booking_resource.update_notification_preferences(booking_id, preferences)
+        return {
+            "message": "Notification preferences updated successfully",
+            "booking_id": booking_id,
+            NOTIFICATION_PREFERENCES: preferences,
+        }, HTTPStatus.OK
+
+    def _build_notification_preferences(self, data: dict):
+        if not data:
+            return None, ({"message": "Request body is required"}, HTTPStatus.BAD_REQUEST)
+
+        channels = data.get(CHANNELS)
+        if not isinstance(channels, list) or not channels:
+            return None, ({"message": "channels must be a non-empty list"}, HTTPStatus.BAD_REQUEST)
+
+        normalized_channels = []
+        allowed_channels = {CHANNEL_EMAIL, CHANNEL_TELEGRAM}
+        for channel in channels:
+            if channel not in allowed_channels:
+                return None, ({"message": f"Unsupported notification channel: {channel}"}, HTTPStatus.BAD_REQUEST)
+            if channel not in normalized_channels:
+                normalized_channels.append(channel)
+
+        telegram_chat_id = data.get(TELEGRAM_CHAT_ID)
+        if CHANNEL_TELEGRAM in normalized_channels and not telegram_chat_id:
+            return None, ({"message": "telegram_chat_id is required when telegram is selected"}, HTTPStatus.BAD_REQUEST)
+
+        return {
+            CHANNELS: normalized_channels,
+            TELEGRAM_CHAT_ID: telegram_chat_id,
+        }, None
 
     def get_member_bookings(self, user_id: str, role: str):
         """Retrieve all booked classes for a member."""
