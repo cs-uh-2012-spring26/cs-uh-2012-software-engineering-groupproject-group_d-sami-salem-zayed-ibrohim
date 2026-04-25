@@ -20,13 +20,28 @@ from app.services.class_service import ClassService
 
 api = Namespace("classes", description="Class management endpoints")
 
+recurrence_model = api.model("ClassRecurrence", {
+    "frequency": fields.String(
+        required=True,
+        description="Recurrence frequency",
+        example="daily",
+        enum=["daily", "weekly", "monthly"],
+    ),
+    "occurrences": fields.Integer(
+        required=True,
+        description="Total number of class occurrences including the first",
+        example=5,
+    ),
+})
+
 create_class_model = api.model("CreateClass", {
     TITLE: fields.String(required=True, description="Class title", example="Yoga for Beginners"),
     START_DATE: fields.String(required=True, description="Class start date (YYYY-MM-DD HH:MM:SS)", example="2026-03-01 10:00:00"),
     END_DATE: fields.String(required=True, description="Class end date (YYYY-MM-DD HH:MM:SS)", example="2026-03-01 11:00:00"),
     CAPACITY: fields.Integer(required=True, description="Class capacity", example=20),
     LOCATION: fields.String(required=True, description="Class location", example="Studio A"),
-    DESCRIPTION: fields.String(required=True, description="Class description", example="A beginner-friendly yoga class")
+    DESCRIPTION: fields.String(required=True, description="Class description", example="A beginner-friendly yoga class"),
+    "recurrence": fields.Nested(recurrence_model, required=False, description="Optional recurrence rules for repeated classes")
 })
 
 class_response = api.model("ClassResponse", {

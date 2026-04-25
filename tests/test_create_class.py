@@ -344,3 +344,139 @@ def test_create_class_trainer_overlap(client, trainer_token):
     assert resp2.status_code == HTTPStatus.CONFLICT
     response_data = resp2.get_json()
     assert "overlap" in response_data["message"].lower()
+
+
+def test_create_recurring_daily_classes_success(client, trainer_token, valid_class_data):
+    """Trainer can create a recurring daily class series."""
+    series_data = valid_class_data.copy()
+    series_data["recurrence"] = {
+        "frequency": "daily",
+        "occurrences": 3,
+    }
+
+    resp = client.post(
+        "/classes",
+        json=series_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+
+    assert resp.status_code == HTTPStatus.CREATED
+    data = resp.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 3
+    assert data[0][TITLE] == valid_class_data[TITLE]
+
+    first_start = datetime.strptime(data[0][START_DATE], "%Y-%m-%d %H:%M:%S")
+    second_start = datetime.strptime(data[1][START_DATE], "%Y-%m-%d %H:%M:%S")
+    third_start = datetime.strptime(data[2][START_DATE], "%Y-%m-%d %H:%M:%S")
+
+    assert second_start - first_start == timedelta(days=1)
+    assert third_start - second_start == timedelta(days=1)
+
+
+def test_create_recurring_weekly_classes_success(client, trainer_token, valid_class_data):
+    """Trainer can create a recurring weekly class series."""
+    series_data = valid_class_data.copy()
+    series_data["recurrence"] = {
+        "frequency": "weekly",
+        "occurrences": 3,
+    }
+
+    resp = client.post(
+        "/classes",
+        json=series_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+
+    assert resp.status_code == HTTPStatus.CREATED
+    data = resp.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 3
+
+    first_start = datetime.strptime(data[0][START_DATE], "%Y-%m-%d %H:%M:%S")
+    second_start = datetime.strptime(data[1][START_DATE], "%Y-%m-%d %H:%M:%S")
+    third_start = datetime.strptime(data[2][START_DATE], "%Y-%m-%d %H:%M:%S")
+
+    assert second_start - first_start == timedelta(weeks=1)
+    assert third_start - second_start == timedelta(weeks=1)
+
+
+def test_create_recurring_monthly_classes_success(client, trainer_token, valid_class_data):
+    """Trainer can create a recurring monthly class series."""
+    series_data = valid_class_data.copy()
+    series_data["recurrence"] = {
+        "frequency": "monthly",
+        "occurrences": 3,
+    }
+
+    resp = client.post(
+        "/classes",
+        json=series_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+
+    assert resp.status_code == HTTPStatus.CREATED
+    data = resp.get_json()
+    assert isinstance(data, list)
+    assert len(data) == 3
+
+    first_start = datetime.strptime(data[0][START_DATE], "%Y-%m-%d %H:%M:%S")
+    second_start = datetime.strptime(data[1][START_DATE], "%Y-%m-%d %H:%M:%S")
+    third_start = datetime.strptime(data[2][START_DATE], "%Y-%m-%d %H:%M:%S")
+
+    assert second_start.month != first_start.month
+    assert third_start.month != second_start.month
+
+
+def test_create_class_without_recurrence_still_works(client, trainer_token, valid_class_data):
+    """Single class creation still works without recurrence."""
+    resp = client.post(
+        "/classes",
+        json=valid_class_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+
+    assert resp.status_code == HTTPStatus.CREATED
+    data = resp.get_json()
+    assert isinstance(data, dict)
+    assert data[TITLE] == valid_class_data[TITLE]
+    assert data[CAPACITY] == valid_class_data[CAPACITY]
+    assert data[LOCATION] == valid_class_data[LOCATION]
+
+
+def test_create_recurring_occurrences_one_returns_bad_request(client, trainer_token, valid_class_data):
+    """Recurrence with occurrences=1 returns 400."""
+    bad_data = valid_class_data.copy()
+    bad_data["recurrence"] = {
+        "frequency": "daily",
+        "occurrences": 1,
+    }
+
+    resp = client.post(
+        "/classes",
+        json=bad_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+
+    assert resp.status_code == HTTPStatus.BAD_REQUEST
+    response_data = resp.get_json()
+    assert "occurrences" in response_data["message"].lower()
+
+
+def test_create_recurring_invalid_frequency(client, trainer_token, valid_class_data):
+    """Invalid recurrence frequency returns 400."""
+    invalid_data = valid_class_data.copy()
+    invalid_data["recurrence"] = {
+        "frequency": "yearly",
+        "occurrences": 3,
+    }
+
+    resp = client.post(
+        "/classes",
+        json=invalid_data,
+        headers={"Authorization": f"Bearer {trainer_token}"}
+    )
+
+    assert resp.status_code == HTTPStatus.BAD_REQUEST
+    response_data = resp.get_json()
+    assert "frequency" in response_data["message"].lower()

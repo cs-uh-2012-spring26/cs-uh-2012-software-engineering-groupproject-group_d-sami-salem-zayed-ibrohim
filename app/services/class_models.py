@@ -14,6 +14,7 @@ from app.db.classes import (
 
 
 CLASS_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+VALID_RECURRENCE_FREQUENCIES = {"daily", "weekly", "monthly"}
 
 
 @dataclass(frozen=True)
@@ -49,12 +50,63 @@ class ClassSchedule:
 
 
 @dataclass(frozen=True)
+class RecurrenceRule:
+    frequency: str
+    occurrences: int
+
+    @classmethod
+    def from_payload(cls, payload: dict):
+        if not isinstance(payload, dict):
+            raise ValueError("Recurrence must be an object with frequency and occurrences")
+
+        frequency = payload.get("frequency")
+        occurrences = payload.get("occurrences")
+
+        if frequency not in VALID_RECURRENCE_FREQUENCIES:
+            raise ValueError("Recurrence frequency must be one of daily, weekly, or monthly")
+
+        if not isinstance(occurrences, int) or occurrences < 2:
+            raise ValueError("Recurrence occurrences must be an integer greater than 1")
+
+        return cls(frequency=frequency, occurrences=occurrences)
+
+    def generate_schedules(self, base_schedule: ClassSchedule):
+        schedules = [base_schedule]
+
+        for index in range(1, self.occurrences):
+            schedules.append(
+                ClassSchedule(
+                    start_date=self._advance(base_schedule.start_date, index),
+                    end_date=self._advance(base_schedule.end_date, index),
+                )
+            )
+
+        return schedules
+
+    def _advance(self, value: datetime, step: int):
+        if self.frequency == "daily":
+            return value + timedelta(days=step)
+        if self.frequency == "weekly":
+            return value + timedelta(weeks=step)
+        return self._add_months(value, step)
+
+    @staticmethod
+    def _add_months(value: datetime, months: int):
+        month = value.month - 1 + months
+        year = value.year + month // 12
+        month = month % 12 + 1
+        day = min(value.day, calendar.monthrange(year, month)[1])
+        return value.replace(year=year, month=month, day=day)
+
+
+@dataclass(frozen=True)
 class CreateClassRequest:
     title: str
     schedule: ClassSchedule
     capacity: int
     location: str
     description: str
+    recurrence: Optional[RecurrenceRule] = None
 
     @classmethod
     def from_payload(cls, payload: dict):
@@ -76,25 +128,38 @@ class CreateClassRequest:
         schedule = ClassSchedule.from_strings(start_date_raw, end_date_raw)
         schedule.validate(datetime.now())
 
+        recurrence = None
+        if recurrence_payload is not None:
+            recurrence = RecurrenceRule.from_payload(recurrence_payload)
+
         return cls(
             title=title,
             schedule=schedule,
             capacity=capacity,
             location=location,
             description=description,
+            recurrence=recurrence,
         )
 
-    def to_record(self, trainer_id: str, trainer_name: str):
-        return ClassRecord(
-            title=self.title,
-            trainer_id=trainer_id,
-            trainer_name=trainer_name,
-            start_date=self.schedule.start_date,
-            end_date=self.schedule.end_date,
-            capacity=self.capacity,
-            location=self.location,
-            description=self.description,
-        )
+    def get_schedules(self):
+        if self.recurrence is None:
+            return [self.schedule]
+        return self.recurrence.generate_schedules(self.schedule)
+
+    def to_records(self, trainer_id: str, trainer_name: str):
+        return [
+            ClassRecord(
+                title=self.title,
+                trainer_id=trainer_id,
+                trainer_name=trainer_name,
+                start_date=schedule.start_date,
+                end_date=schedule.end_date,
+                capacity=self.capacity,
+                location=self.location,
+                description=self.description,
+            )
+            for schedule in self.get_schedules()
+        ]
 
 
 @dataclass(frozen=True)
