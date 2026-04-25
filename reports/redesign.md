@@ -229,4 +229,14 @@ Although the main GoF pattern used here is Strategy, these value objects were an
 
 ## 4. Team Responsibilities
 
-[To be added]
+- Task 1 Ibrohim and Salem
+- Task 2:
+  - ⁠Sami - Feature 6
+  - ⁠⁠Ibrohim - Feature 7
+- Task 3:
+  - ⁠Sami - Feature 6
+  - ⁠⁠Zayed - Feature 7
+- Task 4 Ibrohim
+- Task 5:
+  - ⁠Zayed + someone to review - Diagram update
+  - ⁠⁠Ibrohim + Sami + Salem - Documentation
