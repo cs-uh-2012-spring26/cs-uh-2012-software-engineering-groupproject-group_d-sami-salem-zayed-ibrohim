@@ -1,5 +1,7 @@
+import calendar
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Optional
 from app.db.classes import (
     CAPACITY,
     CREATED_AT,
@@ -116,6 +118,7 @@ class CreateClassRequest:
         capacity = payload.get(CAPACITY)
         location = payload.get(LOCATION)
         description = payload.get(DESCRIPTION)
+        recurrence_payload = payload.get("recurrence")
 
         if not all([title, start_date_raw, end_date_raw, capacity is not None, location, description]):
             raise ValueError(
