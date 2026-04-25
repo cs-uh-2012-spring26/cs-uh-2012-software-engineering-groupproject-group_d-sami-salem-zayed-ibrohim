@@ -1,13 +1,13 @@
 from http import HTTPStatus
 from datetime import datetime
 from app.db.classes import ClassResource, TRAINER_ID, TITLE, START_DATE, END_DATE, LOCATION, TRAINER_NAME
-from app.db.bookings import BookingResource, USER_EMAIL, USER_NAME
+from app.db.bookings import BookingResource, USER_NAME
 from app.services.class_models import ClassSchedule
 
 class ReminderService:
 
-    def __init__(self, notification_service):
-        self.notification_service = notification_service
+    def __init__(self, notification_dispatcher):
+        self.notification_dispatcher = notification_dispatcher
         self.class_resource = ClassResource()
         self.booking_resource = BookingResource()
 
@@ -56,9 +56,8 @@ class ReminderService:
 
     def _send_reminders(self, fitness_class: dict, bookings: list):
         for booking in bookings:
-            email = booking.get(USER_EMAIL)
             subject, body = self._build_reminder_message(fitness_class, booking)
-            self.notification_service.send_notification(email, subject, body)
+            self.notification_dispatcher.send_notification(booking, subject, body)
 
     def _build_reminder_message(self, fitness_class: dict, booking: dict):
         subject = f"NYUAD GYM Reminder: {fitness_class.get(TITLE)}"

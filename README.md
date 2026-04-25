@@ -39,6 +39,7 @@ for more info specific to testing Flask applications)
 - Booking system with capacity management
 - Trainer-specific features (view class rosters)
 - Email Reminder Feature
+- Per-booking notification preferences for email and Telegram reminders
 
 # Running Locally
 
@@ -64,8 +65,10 @@ Create a `.env` file in the root directory of your project. Here is a sample .en
     DEBUG="true"
     JWT_SECRET_KEY="9f8c1e5a6b4d3c2e1a9b8f7d6c5e4a3b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4"
     SES_SENDER_EMAIL="NYUAD.GYM@gmail.com"
+    TELEGRAM_BOT_TOKEN=""
 
 > Note: This assumes you have an active, production-grade AWS account with Amazon SES email functionality enabled. For more information, check out this: [Link](https://aws.amazon.com/ses/).
+> Telegram reminders require a Telegram bot token. Leave `TELEGRAM_BOT_TOKEN` empty if you only use email reminders.
 
 ---
 
@@ -92,6 +95,33 @@ You can use `ctrl-c` to stop the server.
 Run `make tests` to execute the test suite and see the coverage report
 in your terminal. You can also see a visual report by viewing
 [/htmlcov/index.html](/htmlcov/index.html) in your browser.
+
+## Feature 7: Notification Preferences
+
+Members can configure reminders per booking. New bookings default to email-only reminders:
+
+    {
+      "channels": ["email"],
+      "telegram_chat_id": null
+    }
+
+To update a booking's reminder channels, send:
+
+    PATCH /bookings/<booking_id>/notifications
+    Authorization: Bearer <member_token>
+    Content-Type: application/json
+
+    {
+      "channels": ["email", "telegram"],
+      "telegram_chat_id": "123456789"
+    }
+
+Rules:
+
+- Only the member who owns the booking can update its notification preferences.
+- `channels` must include `email`, `telegram`, or both.
+- `telegram_chat_id` is required when `telegram` is selected.
+- Trainers still send reminders through `POST /classes/<class_id>/reminder`; the system delivers each reminder through the channels selected on each booking.
 
 
 ## Project Structure

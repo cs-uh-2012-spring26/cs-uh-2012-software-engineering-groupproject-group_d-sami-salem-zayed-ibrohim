@@ -204,14 +204,31 @@ We used the Strategy pattern for notification delivery:
 - `NotificationService` defines the common `send_notification(...)` interface.
 - `EmailService` adapts email-specific behavior to that generic notification interface.
 - `SESEmailService` is a concrete strategy that sends notifications through AWS SES.
-- `ReminderService` depends on the abstraction and calls `send_notification(...)` without knowing which concrete delivery strategy is being used.
+- `TelegramNotificationService` is a concrete strategy that sends notifications through the Telegram Bot API.
+- `NotificationDispatcher` maps selected channel names to strategy objects.
+- `ReminderService` depends on the dispatcher and does not know which concrete delivery strategy is being used.
 
 This gives us two important benefits:
 
 1. `ReminderService` is closed for modification when a new notification channel is added.
-2. New channels can be introduced by creating another implementation, for example `TelegramNotificationService`, without rewriting the reminder workflow.
+2. New channels can be introduced by creating another implementation, for example `SmsNotificationService`, and registering it with the dispatcher without rewriting the reminder workflow.
 
-In other words, the redesign now follows the extensibility requirement from Sprint 3B: adding a new notification channel means adding a new strategy class instead of editing reminder business logic.
+In other words, the redesign now follows the extensibility requirement from Sprint 3B: adding a new notification channel means adding a new strategy class and one dispatcher registration instead of editing reminder business logic.
+
+### Feature 7: Per-Booking Notification Preferences
+
+Feature 7 is implemented at the booking level because the requirement says the user is already registered in a class. Each booking now stores `notification_preferences`, with email-only as the default for backward compatibility:
+
+```json
+{
+  "channels": ["email"],
+  "telegram_chat_id": null
+}
+```
+
+Members can update their own booking preferences through `PATCH /bookings/<booking_id>/notifications`. The endpoint rejects empty channel lists, unsupported channel names, Telegram preferences without a `telegram_chat_id`, non-member requests, and attempts to update another member's booking.
+
+When a trainer calls `POST /classes/<class_id>/reminder`, `ReminderService` retrieves all bookings and sends each reminder through the channels selected on that booking. Existing bookings without preferences still receive email reminders, so older data remains compatible with the new design.
 
 ### Value Objects for Class Creation
 

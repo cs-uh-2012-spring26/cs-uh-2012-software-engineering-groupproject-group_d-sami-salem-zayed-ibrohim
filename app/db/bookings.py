@@ -1,6 +1,8 @@
 from app.db.utils import serialize_item, serialize_items
 from app.db import DB
 from datetime import datetime
+from bson import ObjectId
+from bson.errors import InvalidId
 
 
 # Booking Collection Name
@@ -13,6 +15,16 @@ USER_EMAIL = "user_email"
 USER_NAME = "user_name"
 BOOKING_TIME = "booking_time"
 IS_TRAINER = "is_trainer"
+NOTIFICATION_PREFERENCES = "notification_preferences"
+CHANNELS = "channels"
+TELEGRAM_CHAT_ID = "telegram_chat_id"
+CHANNEL_EMAIL = "email"
+CHANNEL_TELEGRAM = "telegram"
+
+DEFAULT_NOTIFICATION_PREFERENCES = {
+    CHANNELS: [CHANNEL_EMAIL],
+    TELEGRAM_CHAT_ID: None,
+}
 
 
 class BookingResource:
@@ -20,8 +32,9 @@ class BookingResource:
     def __init__(self):
         self.collection = DB.get_collection(BOOKING_COLLECTION)
 
-    def create_booking(self, class_id: str, user_id: str, user_email: str, 
-                       user_name: str, is_trainer: bool = False):
+    def create_booking(self, class_id: str, user_id: str, user_email: str,
+                       user_name: str, is_trainer: bool = False,
+                       notification_preferences: dict = None):
         """Create a new booking"""
         booking = {
             CLASS_ID: class_id,
@@ -29,10 +42,21 @@ class BookingResource:
             USER_EMAIL: user_email,
             USER_NAME: user_name,
             BOOKING_TIME: datetime.now(),
-            IS_TRAINER: is_trainer
+            IS_TRAINER: is_trainer,
+            NOTIFICATION_PREFERENCES: notification_preferences or dict(DEFAULT_NOTIFICATION_PREFERENCES),
         }
         result = self.collection.insert_one(booking)
         return result.inserted_id
+
+    def get_booking_by_id(self, booking_id: str):
+        """Get booking by ID"""
+        try:
+            object_id = ObjectId(booking_id)
+        except (InvalidId, TypeError):
+            return None
+
+        booking = self.collection.find_one({"_id": object_id})
+        return serialize_item(booking)
 
     def get_bookings_by_class(self, class_id: str):
         """Get all bookings for a specific class"""
@@ -43,6 +67,19 @@ class BookingResource:
         """Get all bookings for a specific user"""
         bookings = self.collection.find({USER_ID: user_id}).sort(BOOKING_TIME, -1)
         return serialize_items(list(bookings))
+
+    def update_notification_preferences(self, booking_id: str, preferences: dict):
+        """Update notification preferences for a booking"""
+        try:
+            object_id = ObjectId(booking_id)
+        except (InvalidId, TypeError):
+            return False
+
+        result = self.collection.update_one(
+            {"_id": object_id},
+            {"$set": {NOTIFICATION_PREFERENCES: preferences}},
+        )
+        return result.modified_count == 1
 
     def check_existing_booking(self, class_id: str, user_id: str):
         """Check if user already has a booking for this class"""
