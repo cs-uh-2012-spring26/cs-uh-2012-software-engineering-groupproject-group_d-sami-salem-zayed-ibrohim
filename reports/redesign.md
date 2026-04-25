@@ -255,5 +255,5 @@ Although the main GoF pattern used here is Strategy, these value objects were an
   - ⁠⁠Zayed - Feature 7
 - Task 4 Ibrohim
 - Task 5:
-  - ⁠Zayed + someone to review - Diagram update
+  - ⁠Zayed + (Ibrohim + Salem = review) - Diagram update
   - ⁠⁠Ibrohim + Sami + Salem - Documentation
