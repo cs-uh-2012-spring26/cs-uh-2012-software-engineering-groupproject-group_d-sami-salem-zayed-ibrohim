@@ -96,11 +96,44 @@ Run `make tests` to execute the test suite and see the coverage report
 in your terminal. You can also see a visual report by viewing
 [/htmlcov/index.html](/htmlcov/index.html) in your browser.
 
+## Feature 6
+
+Trainers can send email reminders to members booked into a class so they receive a timely notification before attending.
+
+Endpoint:
+
+- `POST /classes/<class_id>/reminder`
+- Requires a trainer JWT in the `Authorization: Bearer <TRAINER_TOKEN>` header.
+- Only the trainer assigned to the class can send reminders.
+- Sends reminders to all members booked into the class.
+
+Example:
+
+```bash
+curl -X POST http://127.0.0.1:8000/classes/<CLASS_ID>/reminder \
+  -H "Authorization: Bearer <TRAINER_TOKEN>"
+```
+
 ## Feature 7: Notification Preferences
 
 Members can configure reminders per booking. New bookings default to email-only reminders:
 
 Instructions on how to use the feature on your machine can be found at [docs/telegram.md](docs/telegram.md)
+
+Endpoint:
+
+- `PATCH /bookings/<booking_id>/notifications`
+- Requires the booking owner's member JWT in the `Authorization: Bearer <MEMBER_TOKEN>` header.
+- Updates which reminder channels should be used for that booking.
+
+Example:
+
+```bash
+curl -X PATCH http://127.0.0.1:8000/bookings/<BOOKING_ID>/notifications \
+  -H "Authorization: Bearer <MEMBER_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"channels":["email","telegram"],"telegram_chat_id":"<YOUR_CHAT_ID>"}'
+```
 
 Rules:
 

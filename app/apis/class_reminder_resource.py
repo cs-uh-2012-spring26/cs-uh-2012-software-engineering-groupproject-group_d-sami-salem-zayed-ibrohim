@@ -13,7 +13,10 @@ from app.apis.class_resource import api
 
 @api.route("/<string:class_id>/reminder")
 class ClassReminder(Resource):
-    @api.doc(security="Bearer")
+    @api.doc(
+        security="Bearer",
+        params={"class_id": "ID of the class whose booked members should receive reminders"},
+    )
     @api.response(200, "Class reminders sent successfully")
     @api.response(404, "Class not found")
     @api.response(403, "Only the assigned trainer of this class can send reminders")

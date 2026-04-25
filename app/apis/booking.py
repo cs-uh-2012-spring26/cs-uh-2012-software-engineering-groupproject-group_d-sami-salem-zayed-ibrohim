@@ -105,7 +105,10 @@ class BookingNotifications(Resource):
     @api.response(HTTPStatus.UNAUTHORIZED, "Authentication required or invalid token")
     @api.response(HTTPStatus.FORBIDDEN, "Only the booking owner member can update preferences")
     @api.response(HTTPStatus.NOT_FOUND, "Booking not found")
-    @api.doc(security='Bearer')
+    @api.doc(
+        security='Bearer',
+        params={"booking_id": "ID of the booking whose notification preferences should be updated"},
+    )
     @jwt_required()
     def patch(self, booking_id):
         """Configure email and telegram reminders for a booked class"""
