@@ -3,6 +3,7 @@ from app.db import DB
 from collections.abc import Mapping
 from datetime import datetime
 from bson import ObjectId
+from bson.errors import InvalidId
 
 # Class Collection Name
 CLASS_COLLECTION = "classes"
@@ -17,6 +18,7 @@ CAPACITY = "capacity"
 LOCATION = "location"
 DESCRIPTION = "description"
 CREATED_AT = "created_at"
+REMAINING_SPOTS = "remaining_spots"
 
 
 class ClassResource:
@@ -39,10 +41,12 @@ class ClassResource:
     def get_class_by_id(self, class_id: str):
         """Get class by ID"""
         try:
-            fitness_class = self.collection.find_one({"_id": ObjectId(class_id)})
-            return serialize_item(fitness_class)
-        except:
+            object_id = ObjectId(class_id)
+        except (InvalidId, TypeError):
             return None
+
+        fitness_class = self.collection.find_one({"_id": object_id})
+        return serialize_item(fitness_class)
 
     def get_classes_by_trainer(self, trainer_id: str):
         """Get all classes for a specific trainer"""
@@ -79,7 +83,7 @@ class ClassResource:
             CREATED_AT: cls.get(CREATED_AT),
         }
         if remaining_spots is not None:
-            result["remaining_spots"] = remaining_spots
+            result[REMAINING_SPOTS] = remaining_spots
         return result
 
     def _normalize_class_data(self, class_data, legacy_fields):

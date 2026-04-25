@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from app.db.classes import ClassResource, TRAINER_ID
-from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME
+from app.db.bookings import BookingResource, USER_NAME, USER_EMAIL, BOOKING_TIME, IS_TRAINER
 from app.db.users import ROLE_TRAINER
 
 
@@ -28,7 +28,7 @@ class ClassMembersService:
         bookings = self.booking_resource.get_bookings_by_class(class_id)
         members = []
         for booking in bookings:
-            if not booking.get("is_trainer", False):
+            if not booking.get(IS_TRAINER, False):
                 members.append({
                     USER_NAME: booking.get(USER_NAME),
                     USER_EMAIL: booking.get(USER_EMAIL),

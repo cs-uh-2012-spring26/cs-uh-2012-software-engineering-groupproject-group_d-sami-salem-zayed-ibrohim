@@ -1,6 +1,8 @@
 from http import HTTPStatus
 from flask_jwt_extended import create_access_token
+from app.db.constants import ID
 from app.db.users import UserResource, EMAIL, PASSWORD, NAME, BIRTHDAY, ROLE, ROLE_MEMBER, ROLE_TRAINER
+from app.services.auth_context import ROLE_CLAIM, USER_ID_CLAIM
 
 
 class AuthService:
@@ -34,12 +36,12 @@ class AuthService:
 
         access_token = create_access_token(
             identity=email,
-            additional_claims={"role": role, "user_id": str(user_id)}
+            additional_claims={ROLE_CLAIM: role, USER_ID_CLAIM: str(user_id)}
         )
 
         return {
             "access_token": access_token,
-            "user": {"email": email, "name": name, "role": role, "_id": str(user_id)}
+            "user": {EMAIL: email, NAME: name, ROLE: role, ID: str(user_id)}
         }, HTTPStatus.CREATED
 
     def login_user(self, data: dict):
@@ -56,7 +58,7 @@ class AuthService:
 
         access_token = create_access_token(
             identity=email,
-            additional_claims={"role": user[ROLE], "user_id": user["_id"]}
+            additional_claims={ROLE_CLAIM: user[ROLE], USER_ID_CLAIM: user[ID]}
         )
 
         user.pop(PASSWORD, None)

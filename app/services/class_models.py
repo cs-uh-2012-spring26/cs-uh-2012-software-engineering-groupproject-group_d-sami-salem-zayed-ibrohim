@@ -1,5 +1,16 @@
 from dataclasses import dataclass
 from datetime import datetime
+from app.db.classes import (
+    CAPACITY,
+    CREATED_AT,
+    DESCRIPTION,
+    END_DATE,
+    LOCATION,
+    START_DATE,
+    TITLE,
+    TRAINER_ID,
+    TRAINER_NAME,
+)
 
 
 CLASS_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -47,12 +58,12 @@ class CreateClassRequest:
 
     @classmethod
     def from_payload(cls, payload: dict):
-        title = payload.get("title")
-        start_date_raw = payload.get("start_date")
-        end_date_raw = payload.get("end_date")
-        capacity = payload.get("capacity")
-        location = payload.get("location")
-        description = payload.get("description")
+        title = payload.get(TITLE)
+        start_date_raw = payload.get(START_DATE)
+        end_date_raw = payload.get(END_DATE)
+        capacity = payload.get(CAPACITY)
+        location = payload.get(LOCATION)
+        description = payload.get(DESCRIPTION)
 
         if not all([title, start_date_raw, end_date_raw, capacity is not None, location, description]):
             raise ValueError(
@@ -99,13 +110,13 @@ class ClassRecord:
 
     def to_document(self):
         return {
-            "title": self.title,
-            "trainer_id": self.trainer_id,
-            "trainer_name": self.trainer_name,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
-            "capacity": self.capacity,
-            "location": self.location,
-            "description": self.description,
-            "created_at": datetime.now(),
+            TITLE: self.title,
+            TRAINER_ID: self.trainer_id,
+            TRAINER_NAME: self.trainer_name,
+            START_DATE: self.start_date,
+            END_DATE: self.end_date,
+            CAPACITY: self.capacity,
+            LOCATION: self.location,
+            DESCRIPTION: self.description,
+            CREATED_AT: datetime.now(),
         }
