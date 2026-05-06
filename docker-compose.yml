@@ -1,0 +1,31 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URI: mongodb://mongodb:27017
+      DB_NAME: fitness_class_dev
+      MOCK_DB: "false"
+      DEBUG: "true"
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-9f8c1e5a6b4d3c2e1a9b8f7d6c5e4a3b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4}
+      SES_SENDER_EMAIL: ${SES_SENDER_EMAIL:-NYUAD.GYM@gmail.com}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_data:
