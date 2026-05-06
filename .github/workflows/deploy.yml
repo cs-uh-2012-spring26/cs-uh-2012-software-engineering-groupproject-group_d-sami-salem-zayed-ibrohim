@@ -1,0 +1,26 @@
+name: CD Workflow for Deployment
+
+on:
+  workflow_run:
+    workflows: ["CI Workflow for Testing"]
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.VM_APP_PATH }}
+            git pull origin main
+            docker compose up --build -d
