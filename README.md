@@ -142,16 +142,14 @@ Authorize in Swagger, click the `connect to telegram` button, press start in Tel
 curl -X PATCH http://127.0.0.1:8000/notifications \
   -H "Authorization: Bearer <MEMBER_TOKEN>" \
   -H "Content-Type: application/json" \
-  -d '{"channels":["email","telegram"]}'
+  -d '{"channels":["telegram"]}'
 ```
 
 Rules:
 
 - Only members can update notification preferences.
-- `channels` must include `email`, `telegram`, or both.
-- Members do not manually enter Telegram chat ids.
-- The app receives Telegram `/start` messages through long polling, so local testing does not require ngrok.
-- Trainers still send reminders through `POST /classes/<class_id>/reminder`; the system delivers each reminder through the channels selected on each user account.
+- `channels` must include `telegram`.
+- Trainers send reminders through `POST /classes/<class_id>/reminder`; the system delivers each reminder through the channels selected on each user account.
 
 
 ## Project Structure

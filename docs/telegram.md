@@ -1,10 +1,6 @@
-# Testing Feature 7: Telegram Notifications
+# testing telegram notifications
 
-Use this guide to test Telegram reminders with the shared app bot. Members should not create a bot or manually copy a chat id.
-
-## 1. Configure Telegram
-
-Set the shared bot token in `.env`. The bot username defaults to `sepr2bot`, but you can override it if needed.
+## 1. env
 
 ```env
 TELEGRAM_BOT_TOKEN="<shared_bot_token>"
@@ -12,116 +8,101 @@ TELEGRAM_BOT_USERNAME="sepr2bot"
 TELEGRAM_BOT_POLLING_ENABLED="true"
 ```
 
-The app now uses Telegram long polling. Local testing does not require ngrok or `setWebhook`; when polling starts, the app clears any old webhook so `getUpdates` can receive bot messages.
+no ngrok or webhook setup needed.
 
-## 2. Start the App
+## 2. start app
+
+local:
 
 ```bash
 make run_local_server
 ```
 
-The API should be available at `http://127.0.0.1:8000`.
+docker:
 
-## 3. Create Test Users
+```bash
+docker compose up --build
+```
 
-Register a trainer and copy the returned `access_token` as `TRAINER_TOKEN`:
+## 3. create users
+
+trainer:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"trainer_telegram@test.com","password":"password123","name":"Telegram Trainer","birthday":"1990-01-01","role":"trainer"}'
+  -d '{"email":"trainer_telegram@test.com","password":"password123","name":"telegram trainer","birthday":"1990-01-01","role":"trainer"}'
 ```
 
-Register a member and copy the returned `access_token` as `MEMBER_TOKEN`:
+member:
 
 ```bash
 curl -X POST http://127.0.0.1:8000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email":"member_telegram@test.com","password":"password123","name":"Telegram Member","birthday":"2000-01-01","role":"member"}'
+  -d '{"email":"member_telegram@test.com","password":"password123","name":"telegram member","birthday":"2000-01-01","role":"member"}'
 ```
 
-## 4. Link Telegram
+save both `access_token` values as `trainer_token` and `member_token`.
 
-In Swagger, click **Authorize** and paste the member token as `Bearer <MEMBER_TOKEN>`.
+## 4. connect telegram
 
-Click **connect to telegram** next to the authorize button. Swagger calls `/notifications`, gets a user-specific `telegram_launch_url`, and opens Telegram.
+1. open `http://127.0.0.1:8000`
+2. click **authorize**
+3. paste `Bearer <member_token>`
+4. click **connect to telegram**
+5. press **start** in telegram
 
-Press **Start** in Telegram. The running app polls Telegram, receives `/start <user_token>`, stores your Telegram `chat.id`, and sends a confirmation message in the bot chat.
-
-To confirm the app stored the chat id:
+verify:
 
 ```bash
 curl -X GET http://127.0.0.1:8000/notifications \
-  -H "Authorization: Bearer <MEMBER_TOKEN>"
+  -H "Authorization: Bearer <member_token>"
 ```
 
-Expected:
+check for:
 
 ```json
-{
-  "notification_preferences": {
-    "channels": ["email"]
-  },
-  "telegram_connected": true,
-  "telegram_launch_url": "https://t.me/sepr2bot?start=<user_token>"
-}
+"telegram_connected": true
 ```
 
-## 5. Enable Telegram Notifications
+## 5. enable telegram only
 
 ```bash
 curl -X PATCH http://127.0.0.1:8000/notifications \
-  -H "Authorization: Bearer <MEMBER_TOKEN>" \
+  -H "Authorization: Bearer <member_token>" \
   -H "Content-Type: application/json" \
-  -d '{"channels":["email","telegram"]}'
+  -d '{"channels":["telegram"]}'
 ```
 
-Expected response:
-
-```json
-{
-  "message": "Notification preferences updated successfully",
-  "notification_preferences": {
-    "channels": ["email", "telegram"]
-  },
-  "telegram_connected": true,
-  "telegram_launch_url": "https://t.me/sepr2bot?start=<user_token>"
-}
-```
-
-## 6. Create and Book a Future Class
-
-Use the trainer token to create a future class. Copy the returned `_id` as `CLASS_ID`.
+## 6. create class
 
 ```bash
 curl -X POST http://127.0.0.1:8000/classes \
-  -H "Authorization: Bearer <TRAINER_TOKEN>" \
+  -H "Authorization: Bearer <trainer_token>" \
   -H "Content-Type: application/json" \
-  -d '{"title":"Telegram Test Yoga","start_date":"2026-12-01 10:00:00","end_date":"2026-12-01 11:00:00","capacity":10,"location":"Studio A","description":"Testing Telegram reminders"}'
+  -d '{"title":"telegram test yoga","start_date":"2027-12-01 10:00:00","end_date":"2027-12-01 11:00:00","capacity":10,"location":"studio a","description":"testing telegram reminders"}'
 ```
 
-Use the member token to book the class:
+save returned `_id` as `class_id`.
+
+## 7. book class
 
 ```bash
 curl -X POST http://127.0.0.1:8000/bookings \
-  -H "Authorization: Bearer <MEMBER_TOKEN>" \
+  -H "Authorization: Bearer <member_token>" \
   -H "Content-Type: application/json" \
-  -d '{"class_id":"<CLASS_ID>"}'
+  -d '{"class_id":"<class_id>"}'
 ```
 
-## 7. Send the Reminder
+## 8. send reminder
 
 ```bash
-curl -X POST http://127.0.0.1:8000/classes/<CLASS_ID>/reminder \
-  -H "Authorization: Bearer <TRAINER_TOKEN>"
+curl -X POST http://127.0.0.1:8000/classes/<class_id>/reminder \
+  -H "Authorization: Bearer <trainer_token>"
 ```
 
-Expected API response:
+success:
 
 ```json
-{
-  "message": "Reminders sent successfully"
-}
+{"message":"Reminders sent successfully"}
 ```
-
-You should receive the reminder message in Telegram.
