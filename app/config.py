@@ -30,3 +30,6 @@ class Config(object):
     JWT_SECRET_KEY = get_required_environ("JWT_SECRET_KEY")
     SES_SENDER_EMAIL = get_required_environ("SES_SENDER_EMAIL")
     TELEGRAM_BOT_TOKEN = get_optional_environ("TELEGRAM_BOT_TOKEN")
+    TELEGRAM_BOT_USERNAME = get_optional_environ("TELEGRAM_BOT_USERNAME", "sepr2bot")
+    TELEGRAM_BOT_POLLING_ENABLED = get_optional_environ("TELEGRAM_BOT_POLLING_ENABLED", "false").lower() == "true"
+    TELEGRAM_BOT_POLL_TIMEOUT = int(get_optional_environ("TELEGRAM_BOT_POLL_TIMEOUT", "20"))

@@ -20,6 +20,9 @@ def app():
     os.environ["DEBUG"] = "true"
     os.environ["JWT_SECRET_KEY"] = "test-secret-key"
     os.environ["SES_SENDER_EMAIL"] = "test@example.com"
+    os.environ["TELEGRAM_BOT_TOKEN"] = "test-bot-token"
+    os.environ["TELEGRAM_BOT_USERNAME"] = "sepr2bot"
+    os.environ["TELEGRAM_BOT_POLLING_ENABLED"] = "false"
 
     from importlib import reload
     import app.config

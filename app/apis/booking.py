@@ -4,11 +4,8 @@ from flask_jwt_extended import jwt_required
 from http import HTTPStatus
 from app.db.bookings import (
     BOOKING_TIME,
-    CHANNELS,
     CLASS_ID,
     IS_TRAINER,
-    NOTIFICATION_PREFERENCES,
-    TELEGRAM_CHAT_ID,
     USER_EMAIL,
     USER_ID,
     USER_NAME,
@@ -24,20 +21,6 @@ create_booking_model = api.model("CreateBooking", {
     CLASS_ID: fields.String(required=True, description="Class ID to book", example="507f1f77bcf86cd799439011")
 })
 
-notification_preferences_model = api.model("NotificationPreferences", {
-    CHANNELS: fields.List(
-        fields.String(enum=["email", "telegram"]),
-        required=True,
-        description="Notification channels selected for this booking",
-        example=["email", "telegram"],
-    ),
-    TELEGRAM_CHAT_ID: fields.String(
-        required=False,
-        description="Telegram chat id required when telegram is selected",
-        example="123456789",
-    ),
-})
-
 booking_response = api.model("BookingResponse", {
     ID: fields.String(description="Booking ID"),
     CLASS_ID: fields.String(description="Class ID"),
@@ -46,13 +29,6 @@ booking_response = api.model("BookingResponse", {
     USER_NAME: fields.String(description="User name"),
     BOOKING_TIME: fields.String(description="Booking timestamp"),
     IS_TRAINER: fields.Boolean(description="Whether the user is a trainer"),
-    NOTIFICATION_PREFERENCES: fields.Nested(notification_preferences_model),
-})
-
-notification_preferences_response = api.model("NotificationPreferencesResponse", {
-    "message": fields.String(description="Result message"),
-    "booking_id": fields.String(description="Booking ID"),
-    NOTIFICATION_PREFERENCES: fields.Nested(notification_preferences_model),
 })
 
 
@@ -94,28 +70,4 @@ class MyBookedClasses(Resource):
         return BookingService().get_member_bookings(
             user_id=auth_user.user_id,
             role=auth_user.role
-        )
-
-
-@api.route("/<string:booking_id>/notifications")
-class BookingNotifications(Resource):
-    @api.expect(notification_preferences_model)
-    @api.response(HTTPStatus.OK, "Notification preferences updated", notification_preferences_response)
-    @api.response(HTTPStatus.BAD_REQUEST, "Invalid notification preferences")
-    @api.response(HTTPStatus.UNAUTHORIZED, "Authentication required or invalid token")
-    @api.response(HTTPStatus.FORBIDDEN, "Only the booking owner member can update preferences")
-    @api.response(HTTPStatus.NOT_FOUND, "Booking not found")
-    @api.doc(
-        security='Bearer',
-        params={"booking_id": "ID of the booking whose notification preferences should be updated"},
-    )
-    @jwt_required()
-    def patch(self, booking_id):
-        """Configure email and telegram reminders for a booked class"""
-        auth_user = get_authenticated_user()
-        return BookingService().update_notification_preferences(
-            booking_id=booking_id,
-            user_id=auth_user.user_id,
-            role=auth_user.role,
-            data=request.json,
         )

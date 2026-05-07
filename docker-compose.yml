@@ -7,10 +7,12 @@ services:
       MONGO_URI: mongodb://mongodb:27017
       DB_NAME: fitness_class_dev
       MOCK_DB: "false"
-      DEBUG: "true"
+      DEBUG: "false"
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-9f8c1e5a6b4d3c2e1a9b8f7d6c5e4a3b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4}
       SES_SENDER_EMAIL: ${SES_SENDER_EMAIL:-NYUAD.GYM@gmail.com}
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-sepr2bot}
+      TELEGRAM_BOT_POLLING_ENABLED: ${TELEGRAM_BOT_POLLING_ENABLED:-true}
     depends_on:
       mongodb:
         condition: service_healthy
