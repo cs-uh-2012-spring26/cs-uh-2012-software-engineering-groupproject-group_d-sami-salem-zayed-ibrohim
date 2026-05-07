@@ -39,7 +39,7 @@ for more info specific to testing Flask applications)
 - Booking system with capacity management
 - Trainer-specific features (view class rosters)
 - Email Reminder Feature
-- Per-booking notification preferences for email and Telegram reminders
+- User-level notification preferences for email and Telegram reminders
 
 # Running Locally
 
@@ -66,9 +66,11 @@ Create a `.env` file in the root directory of your project. Here is a sample .en
     JWT_SECRET_KEY="9f8c1e5a6b4d3c2e1a9b8f7d6c5e4a3b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4"
     SES_SENDER_EMAIL="NYUAD.GYM@gmail.com"
     TELEGRAM_BOT_TOKEN=""
+    TELEGRAM_BOT_USERNAME="sepr2bot"
+    TELEGRAM_BOT_POLLING_ENABLED="true"
 
 > Note: This assumes you have an active, production-grade AWS account with Amazon SES email functionality enabled. For more information, check out this: [Link](https://aws.amazon.com/ses/).
-> Telegram reminders require a Telegram bot token. Leave `TELEGRAM_BOT_TOKEN` empty if you only use email reminders.
+> Telegram reminders use one shared app bot. Configure `TELEGRAM_BOT_TOKEN` and keep polling enabled so the app can receive `/start` messages from Telegram without a public webhook.
 
 ---
 
@@ -88,7 +90,7 @@ Run:
 
 You can use `ctrl-c` to stop the server.
 
-> Note: Alternatively, you can run the following command: `FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
+> Note: Alternatively, you can run the following command: `TELEGRAM_BOT_POLLING_ENABLED=true FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
 
 ## 5. (Optional) Testing the API server
 
@@ -116,31 +118,40 @@ curl -X POST http://127.0.0.1:8000/classes/<CLASS_ID>/reminder \
 
 ## Feature 7: Notification Preferences
 
-Members can configure reminders per booking. New bookings default to email-only reminders:
+Members configure reminder channels once for their account. New users default to email-only reminders:
 
 Instructions on how to use the feature on your machine can be found at [docs/telegram.md](docs/telegram.md)
 
 Endpoint:
 
-- `PATCH /bookings/<booking_id>/notifications`
-- Requires the booking owner's member JWT in the `Authorization: Bearer <MEMBER_TOKEN>` header.
-- Updates which reminder channels should be used for that booking.
+- `GET /notifications`
+- `PATCH /notifications`
+- `GET /notifications` returns the member's current channels and user-specific Telegram launch URL.
+- `PATCH /notifications` updates account-level channels.
 
 Example:
 
 ```bash
-curl -X PATCH http://127.0.0.1:8000/bookings/<BOOKING_ID>/notifications \
+curl -X GET http://127.0.0.1:8000/notifications \
+  -H "Authorization: Bearer <MEMBER_TOKEN>"
+```
+
+Authorize in Swagger, click the `connect to telegram` button, press start in Telegram, then choose Telegram reminders:
+
+```bash
+curl -X PATCH http://127.0.0.1:8000/notifications \
   -H "Authorization: Bearer <MEMBER_TOKEN>" \
   -H "Content-Type: application/json" \
-  -d '{"channels":["email","telegram"],"telegram_chat_id":"<YOUR_CHAT_ID>"}'
+  -d '{"channels":["email","telegram"]}'
 ```
 
 Rules:
 
-- Only the member who owns the booking can update its notification preferences.
+- Only members can update notification preferences.
 - `channels` must include `email`, `telegram`, or both.
-- `telegram_chat_id` is required when `telegram` is selected.
-- Trainers still send reminders through `POST /classes/<class_id>/reminder`; the system delivers each reminder through the channels selected on each booking.
+- Members do not manually enter Telegram chat ids.
+- The app receives Telegram `/start` messages through long polling, so local testing does not require ngrok.
+- Trainers still send reminders through `POST /classes/<class_id>/reminder`; the system delivers each reminder through the channels selected on each user account.
 
 
 ## Project Structure

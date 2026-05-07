@@ -215,20 +215,19 @@ This gives us two important benefits:
 
 In other words, the redesign now follows the extensibility requirement from Sprint 3B: adding a new notification channel means adding a new strategy class and one dispatcher registration instead of editing reminder business logic.
 
-### Feature 7: Per-Booking Notification Preferences
+### Feature 7: User-Level Notification Preferences
 
-Feature 7 is implemented at the booking level because the requirement says the user is already registered in a class. Each booking now stores `notification_preferences`, with email-only as the default for backward compatibility:
+Feature 7 is implemented at the user level so members configure reminder channels once and every booking uses the same preference. Each user stores `notification_preferences`, with email-only as the default:
 
 ```json
 {
-  "channels": ["email"],
-  "telegram_chat_id": null
+  "channels": ["email"]
 }
 ```
 
-Members can update their own booking preferences through `PATCH /bookings/<booking_id>/notifications`. The endpoint rejects empty channel lists, unsupported channel names, Telegram preferences without a `telegram_chat_id`, non-member requests, and attempts to update another member's booking.
+Members can update their notification preferences through `PATCH /notifications`. `GET /notifications` returns the current preferences and a user-specific Telegram bot launch URL. Telegram posts the `/start` token to a hidden webhook route, which stores the user's Telegram chat id without exposing the route in Swagger.
 
-When a trainer calls `POST /classes/<class_id>/reminder`, `ReminderService` retrieves all bookings and sends each reminder through the channels selected on that booking. Existing bookings without preferences still receive email reminders, so older data remains compatible with the new design.
+When a trainer calls `POST /classes/<class_id>/reminder`, `ReminderService` retrieves all bookings and the dispatcher resolves each booked user's notification preferences. If Telegram is selected but not linked, Telegram delivery is skipped for that user while other channels continue.
 
 ### Value Objects for Class Creation
 

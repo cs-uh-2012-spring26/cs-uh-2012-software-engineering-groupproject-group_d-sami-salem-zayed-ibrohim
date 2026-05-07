@@ -1,13 +1,12 @@
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
-from app.db.users import ROLE_TRAINER
-from app.db.bookings import CHANNEL_EMAIL, CHANNEL_TELEGRAM
+from flask import current_app
+from app.db.users import CHANNEL_EMAIL, CHANNEL_TELEGRAM, ROLE_TRAINER
 from app.services.auth_context import get_authenticated_user
 from app.services.notification_dispatcher import NotificationDispatcher
 from app.services.reminder_service import ReminderService
 from app.services.ses_email_service import SESEmailService
 from app.services.telegram_notification_service import TelegramNotificationService
-from app.config import Config
 from app.apis.class_resource import api
 
 
@@ -31,8 +30,8 @@ class ClassReminder(Resource):
             return {"message": "Access denied. Only trainers can send class reminders."}, 403
 
         dispatcher = NotificationDispatcher({
-            CHANNEL_EMAIL: SESEmailService(Config.SES_SENDER_EMAIL),
-            CHANNEL_TELEGRAM: TelegramNotificationService(Config.TELEGRAM_BOT_TOKEN),
+            CHANNEL_EMAIL: SESEmailService(current_app.config.get("SES_SENDER_EMAIL")),
+            CHANNEL_TELEGRAM: TelegramNotificationService(current_app.config.get("TELEGRAM_BOT_TOKEN")),
         })
         reminder_service = ReminderService(dispatcher)
         return reminder_service.send_reminder(class_id, auth_user.user_id)

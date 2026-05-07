@@ -1,8 +1,15 @@
 import pytest
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
-from app.db.bookings import BookingResource, CHANNEL_EMAIL, CHANNEL_TELEGRAM, CHANNELS, TELEGRAM_CHAT_ID
+from app.db.bookings import BookingResource
 from app.db.classes import ClassResource
+from app.db.users import (
+    CHANNEL_EMAIL,
+    CHANNEL_TELEGRAM,
+    CHANNELS,
+    TELEGRAM_LINK_TOKEN,
+    UserResource,
+)
 
 # Global test configuration and shared fixtures for the test suite.
 # Includes authentication tokens and database record setup.
@@ -67,23 +74,40 @@ def sample_booking(app, member_token):
 def sample_bookings_with_prefs(app, sample_class):
     with app.app_context():
         booking_resource = BookingResource()
+        user_resource = UserResource()
+
+        alice_user_id = user_resource.create_user(
+            email="alice@test.com",
+            password="password123",
+            name="Alice",
+            birthday="2000-01-01",
+            role="member"
+        )
+        bob_user_id = user_resource.create_user(
+            email="bob@test.com",
+            password="password123",
+            name="Bob",
+            birthday="2000-01-01",
+            role="member"
+        )
         
-        alice_id = booking_resource.create_booking(
+        booking_resource.create_booking(
             class_id=sample_class,
-            user_id="member_id_alice",
+            user_id=str(alice_user_id),
             user_email="alice@test.com",
             user_name="Alice"
         )
         
         bob_id = booking_resource.create_booking(
             class_id=sample_class,
-            user_id="member_id_bob",
+            user_id=str(bob_user_id),
             user_email="bob@test.com",
             user_name="Bob"
         )
-        booking_resource.update_notification_preferences(str(bob_id), {
+        user_resource.update_notification_preferences(str(bob_user_id), {
             CHANNELS: [CHANNEL_EMAIL, CHANNEL_TELEGRAM],
-            TELEGRAM_CHAT_ID: "12345"
         })
+        bob = user_resource.get_user_by_email("bob@test.com")
+        user_resource.connect_telegram(bob[TELEGRAM_LINK_TOKEN], "12345")
         
         return {"class_id": sample_class, "bob_booking": str(bob_id)}

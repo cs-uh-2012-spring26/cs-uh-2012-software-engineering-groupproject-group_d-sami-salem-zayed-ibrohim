@@ -33,7 +33,7 @@ else
 endif
 
 run_local_server: dev_env tests
-	$(ACTIVATE) && FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000
+	$(ACTIVATE) && TELEGRAM_BOT_POLLING_ENABLED=true FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000
 
 tests: pytests
 
