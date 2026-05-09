@@ -3,7 +3,10 @@
  * Refactored for clean API handling, XSS protection, and modular function blocks.
  */
 
-const API = "http://localhost:8000";
+// Automatically switches between local testing and the public VM
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:8000" 
+    : `http://${window.location.hostname}:8000`;
 const TOKEN_KEY = "fitness_token";
 const ROLE_KEY = "fitness_role";
 
