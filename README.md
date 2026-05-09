@@ -88,11 +88,17 @@ Run:
 
 1. Run `make run_local_server` to run the server. This will also run the tests first.
 2. Go to [http://127.0.0.1:8000](http://127.0.0.1:8000) to see it running!
-3. Go to [http://127.0.0.1](http://127.0.0.1) to use the frontend GUI.
+
+> Note: Alternatively, you can run the following command: `TELEGRAM_BOT_POLLING_ENABLED=true FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
+
+
+**To run the Bonus Frontend:**
+1. Run `docker-compose up --build` to start the full stack (Frontend, API, and Database).
+2. Go to http://127.0.0.1:8000 to verify the API is running.
+3. Go to http://127.0.0.1 to access and use the frontend GUI.
 
 You can use `ctrl-c` to stop the server.
 
-> Note: Alternatively, you can run the following command: `TELEGRAM_BOT_POLLING_ENABLED=true FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
 
 ## 5. (Optional) Testing the API server
 
@@ -101,7 +107,7 @@ in your terminal. You can also see a visual report by viewing
 [/htmlcov/index.html](/htmlcov/index.html) in your browser.
 
 
-## Bonus Frontend
+## 6. Bonus Frontend
 
 This project includes a decoupled frontend GUI served via Nginx. The frontend provides a complete proof-of-concept for:
 
