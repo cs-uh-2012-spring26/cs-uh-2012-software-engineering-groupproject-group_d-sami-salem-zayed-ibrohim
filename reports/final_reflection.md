@@ -22,9 +22,12 @@ Overall I learned how to work in a group, how to make our code efficient and und
 
 ## Sami Akouk
 
-<!-- TODO (Sami): Replace this paragraph with your own reflection (~3–8 sentences). What was most rewarding about Sprint 4 / the project? -->
+My contributions spanned the full lifecycle of the project — from initial setup to production deployment. In Sprint 1, I laid the
+foundation by designing the database schema and building the authentication layer, which every other feature in the project depends
+on. In Sprint 2, I took ownership of the CI pipeline, which became a safety net that the whole team relied on for the rest of the
+project, ensuring no broken code made it into main. In Sprint 3, I contributed to the design reflection and then implemented Feature 6, the recurring classes extension. This required understanding the existing class creation flow deeply and extending it without breaking existing functionality. In Sprint 4, I was responsible for containerization and continuous deployment. Writing the Dockerfile and docker-compose.yml meant the app could run consistently on any machine without manual setup. The CD workflow closed the loop by automating deployment to the EC2 VM whenever CI passes.
 
-*[Placeholder — Sami Akouk to add a short paragraph here.]*
+I knew most of the technologies, practices, and technologies used from previous experiences, but it was still fun to apply it again.
 
 ---
 
