@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Fitness Classes</title>
+    <link rel="stylesheet" href="/frontend/styles.css">
+</head>
+<body>
+    <main class="page">
+        <header class="topbar">
+            <div>
+                <h1>Fitness Classes</h1>
+                <p id="auth-status">Viewing as guest</p>
+            </div>
+            <button id="logout-button" class="hidden" type="button">Log out</button>
+        </header>
+
+        <section class="panel" id="auth-panel">
+            <div class="section-heading">
+                <h2>Account</h2>
+                <p>Log in or create an account to create and RSVP to classes.</p>
+            </div>
+            <div class="auth-grid">
+                <form id="login-form" class="form">
+                    <h3>Log in</h3>
+                    <label>
+                        Email
+                        <input name="email" type="email" autocomplete="email" required>
+                    </label>
+                    <label>
+                        Password
+                        <input name="password" type="password" autocomplete="current-password" required>
+                    </label>
+                    <button type="submit">Log in</button>
+                </form>
+
+                <form id="register-form" class="form">
+                    <h3>Register</h3>
+                    <label>
+                        Name
+                        <input name="name" type="text" autocomplete="name" required>
+                    </label>
+                    <label>
+                        Email
+                        <input name="email" type="email" autocomplete="email" required>
+                    </label>
+                    <label>
+                        Password
+                        <input name="password" type="password" autocomplete="new-password" required>
+                    </label>
+                    <label>
+                        Birthday
+                        <input name="birthday" type="date" required>
+                    </label>
+                    <label>
+                        Role
+                        <select name="role" required>
+                            <option value="member">Member</option>
+                            <option value="trainer">Trainer</option>
+                        </select>
+                    </label>
+                    <button type="submit">Register</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="panel hidden" id="create-panel">
+            <div class="section-heading">
+                <h2>Create class</h2>
+                <p>Trainer-only class creation.</p>
+            </div>
+            <form id="create-class-form" class="form class-form">
+                <label>
+                    Title
+                    <input name="title" type="text" required>
+                </label>
+                <label>
+                    Start
+                    <input name="start_date" type="datetime-local" required>
+                </label>
+                <label>
+                    End
+                    <input name="end_date" type="datetime-local" required>
+                </label>
+                <label>
+                    Capacity
+                    <input name="capacity" type="number" min="1" required>
+                </label>
+                <label>
+                    Location
+                    <input name="location" type="text" required>
+                </label>
+                <label class="full-width">
+                    Description
+                    <textarea name="description" rows="3" required></textarea>
+                </label>
+                <label>
+                    Recurrence
+                    <select name="recurrence_frequency">
+                        <option value="">None</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </label>
+                <label>
+                    Occurrences
+                    <input name="recurrence_occurrences" type="number" min="2" value="2">
+                </label>
+                <button type="submit">Create class</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <div class="section-heading">
+                <h2>Upcoming classes</h2>
+                <button id="refresh-classes" type="button">Refresh</button>
+            </div>
+            <div id="class-list" class="list"></div>
+        </section>
+
+        <section class="panel hidden" id="bookings-panel">
+            <div class="section-heading">
+                <h2>My bookings</h2>
+                <button id="refresh-bookings" type="button">Refresh</button>
+            </div>
+            <div id="booking-list" class="list"></div>
+        </section>
+
+        <p id="status-message" class="status" role="status" aria-live="polite"></p>
+    </main>
+    <script src="/frontend/app.js"></script>
+</body>
+</html>

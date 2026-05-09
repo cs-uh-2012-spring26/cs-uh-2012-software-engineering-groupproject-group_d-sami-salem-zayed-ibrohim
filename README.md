@@ -40,6 +40,7 @@ for more info specific to testing Flask applications)
 - Trainer-specific features (view class rosters)
 - Email Reminder Feature
 - User-level notification preferences for email and Telegram reminders
+- Bonus frontend GUI for login, logout, class creation, and RSVP
 
 # Running Locally
 
@@ -87,6 +88,7 @@ Run:
 
 1. Run `make run_local_server` to run the server. This will also run the tests first.
 2. Go to [http://127.0.0.1:8000](http://127.0.0.1:8000) to see it running!
+3. Go to [http://127.0.0.1:8000/frontend](http://127.0.0.1:8000/frontend) to use the frontend GUI.
 
 You can use `ctrl-c` to stop the server.
 
@@ -97,6 +99,15 @@ You can use `ctrl-c` to stop the server.
 Run `make tests` to execute the test suite and see the coverage report
 in your terminal. You can also see a visual report by viewing
 [/htmlcov/index.html](/htmlcov/index.html) in your browser.
+
+## Bonus Frontend
+
+This project includes the bonus frontend GUI. The frontend is served by the same Flask app at `/frontend` and calls the backend API endpoints for authentication, class creation, class listing, and RSVP bookings.
+
+- Local URL: [http://127.0.0.1:8000/frontend](http://127.0.0.1:8000/frontend)
+- Public VM URL: `http://<vm-public-host>:8000/frontend` (replace `<vm-public-host>` with the deployed VM host once deployment is confirmed)
+
+The frontend is intentionally minimal and uses only white and dark grey styling.
 
 ## Feature 6
 

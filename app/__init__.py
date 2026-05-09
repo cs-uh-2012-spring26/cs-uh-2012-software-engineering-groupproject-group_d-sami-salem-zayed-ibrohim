@@ -10,11 +10,16 @@ from app.services.telegram_bot_polling_service import start_telegram_bot_polling
 from app.swagger_ui import render_swagger_ui
 
 from http import HTTPStatus
-from flask import Flask, request
+from pathlib import Path
+from flask import Flask, request, send_from_directory
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
+
+
+FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
+
 
 def create_app():
     from app.config import Config
@@ -51,6 +56,14 @@ def create_app():
     @api.documentation
     def custom_swagger_ui():
         return render_swagger_ui(api)
+
+    @app.route("/frontend")
+    def frontend_index():
+        return send_from_directory(FRONTEND_DIR, "index.html")
+
+    @app.route("/frontend/<path:filename>")
+    def frontend_assets(filename):
+        return send_from_directory(FRONTEND_DIR, filename)
 
     @app.route("/telegram/webhook", methods=["POST"])
     def telegram_webhook():
