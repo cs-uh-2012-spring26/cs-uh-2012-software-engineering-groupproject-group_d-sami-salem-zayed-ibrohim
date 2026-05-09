@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYUAD Fitness Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- AUTHENTICATION SECTION -->
+    <div id="auth-section" class="card">
+        <h2 id="auth-title">NYUAD Gym Login</h2>
+        <div id="register-fields" class="hidden">
+            <input type="text" id="reg-name" placeholder="Full Name">
+            <input type="text" id="reg-bday" placeholder="Birthday (YYYY-MM-DD)">
+            <select id="reg-role">
+                <option value="member">member</option>
+                <option value="trainer">trainer</option>
+            </select>
+        </div>
+        <input type="email" id="auth-email" placeholder="Email">
+        <input type="password" id="auth-pass" placeholder="Password">
+        <button onclick="handleAuth()" id="auth-btn">Login</button>
+        <p style="text-align:center"> 
+            <span id="toggle-text">Need an account?</span>  
+            <a href="javascript:void(0)" onclick="toggleAuth()" id="toggle-link">Sign Up</a>
+        </p>
+    </div>
+
+    <!-- MAIN APP SECTION -->
+    <div id="app-section" class="hidden">
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="welcome">Portal</h2>
+            <button onclick="logout()" style="width:auto; background:#dc3545;">Logout</button>
+        </div>
+
+        <!-- TRAINER MANAGEMENT -->
+        <div id="trainer-manage-section" class="card hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Trainer Actions (All Classes)</h3>
+                <button onclick="loadClasses()" style="width:auto; padding:5px 15px; background:#6c757d;">↻ Refresh</button>
+            </div>
+            <div id="trainer-class-list"></div>
+        </div>
+
+        <!-- NOTIFICATION PREFERENCES -->
+        <div id="notif-section" class="card hidden">
+            <h3>Notification Preferences</h3>
+            <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="chan-email" style="width: auto; margin: 0;"> Email
+                </label>
+                <label style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="chan-tg" style="width: auto; margin: 0;"> Telegram
+                </label>
+                <button onclick="updateNotifs()" style="width: auto; margin: 0; padding: 5px 15px;">Update Channels</button>
+            </div>
+            <div id="tg-area"></div>
+        </div>
+
+        <!-- CREATE CLASS FORM (Trainer Only) -->
+        <div id="trainer-section" class="card hidden">
+            <h3>Create Class</h3>
+            <input type="text" id="c-title" placeholder="Title">
+            <input type="text" id="c-start" placeholder="Start (YYYY-MM-DD HH:MM:SS)">
+            <input type="text" id="c-end" placeholder="End (YYYY-MM-DD HH:MM:SS)">
+            <input type="number" id="c-cap" placeholder="Capacity">
+            <input type="text" id="c-loc" placeholder="Location">
+            <textarea id="c-desc" placeholder="Description"></textarea>
+            <button onclick="postClass()">Publish Class</button>
+        </div>
+
+        <!-- AVAILABLE CLASSES -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Available Classes</h3>
+                <button onclick="loadClasses()" style="width:auto; padding:5px 15px; background:#6c757d;">↻ Refresh</button>
+            </div>
+            <div id="class-list"></div>
+        </div>
+
+        <!-- MEMBER BOOKINGS -->
+        <div id="member-section" class="card hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>My Bookings</h3>
+                <button onclick="loadBookings()" style="width:auto; padding:5px 15px; background:#6c757d;">↻ Refresh</button>
+            </div>
+            <div id="booking-list"></div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
