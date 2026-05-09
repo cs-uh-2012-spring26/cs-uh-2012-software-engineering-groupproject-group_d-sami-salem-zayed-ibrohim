@@ -30,9 +30,7 @@ Overall I learned how to work in a group, how to make our code efficient and und
 
 ## Zayed Al Tamimi
 
-<!-- TODO (Zayed): Replace this paragraph with your own reflection (~3–8 sentences). What was most rewarding about Sprint 4 / the project? -->
-
-*[Placeholder — Zayed Al Tamimi to add a short paragraph here.]*
+Throughout this project, I gained a deep understanding of the importance of properly designing a system before implementation, specifically through the use of Class and Sequence diagrams. The most challenging aspect was managing the class diagram complexity during Sprint 3B because we applied significant class extraction, which resulted in a system with more classes and connections. I found the most rewarding part of this process to be the development of the Bonus Frontend GUI; after designing the backend, seeing the actual user interface come together felt like bringing the entire project "full circle". My most valuable takeaway, however, was learning optimization techniques regarding code smells, which taught me how to improve maintainability and remove redundancy. These are skills I can now apply to any project beyond software development. Ultimately, I am now more aware of how to plan a system effectively and have successfully delivered a complete piece of software with a great team!
 
 ---
 
