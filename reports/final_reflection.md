@@ -39,6 +39,4 @@ Throughout this project, I gained a deep understanding of the importance of prop
 
 ## Ibrohim Iskandarov
 
-<!-- TODO (Ibrohim): Replace this paragraph with your own reflection (~3–8 sentences). What was most rewarding about Sprint 4 / the project? -->
-
-*[Placeholder — Ibrohim Iskandarov to add a short paragraph here.]*
+Most rewarding part was learning to work in a team. Firstly, to allocate tasks fairly and taking into account the availability of other teammates. Making sure that for bottleneck tasks we choose teammates who are available in the beginning of the sprint for example. Loved it, taught me a lot. Another thing I found really rewarding was the ease of building UI given how our code was well-organized and followed the design and coding principles. I built a demo which ended up not being implemented in the project. 
