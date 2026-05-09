@@ -40,6 +40,15 @@ for more info specific to testing Flask applications)
 - Trainer-specific features (view class rosters)
 - Email Reminder Feature
 - User-level notification preferences for email and Telegram reminders
+- Bonus frontend GUI added
+
+## Frontend (Bonus)
+The project includes a decoupled frontend GUI served via Nginx. The frontend provides a complete proof-of-concept for:
+
+- **Authentication:** Secure login/logout and member registration.
+- **Event Management:** Trainers can create classes with location and capacity details.
+- **RSVP System:** Members can view available spots and book classes.
+- **Live Updates:** All UI actions trigger direct calls to the backend API.
 
 # Running Locally
 
@@ -88,15 +97,32 @@ Run:
 1. Run `make run_local_server` to run the server. This will also run the tests first.
 2. Go to [http://127.0.0.1:8000](http://127.0.0.1:8000) to see it running!
 
+> Note: Alternatively, you can run the following command: `TELEGRAM_BOT_POLLING_ENABLED=true FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
+
+
+**To run the Bonus Frontend Locally:**
+1. Run `docker-compose up --build` to start the full stack (Frontend, API, and Database).
+2. Go to [http://127.0.0.1:8000](http://127.0.0.1:8000) to verify the API is running.
+3. Go to[http://127.0.0.1](http://127.0.0.1) to access and use the Bonus Frontend GUI.
+
 You can use `ctrl-c` to stop the server.
 
-> Note: Alternatively, you can run the following command: `TELEGRAM_BOT_POLLING_ENABLED=true FLASK_APP=app flask run --debug --host=0.0.0.0 --port 8000`
 
 ## 5. (Optional) Testing the API server
 
 Run `make tests` to execute the test suite and see the coverage report
 in your terminal. You can also see a visual report by viewing
 [/htmlcov/index.html](/htmlcov/index.html) in your browser.
+
+
+## 6. Accessing the Deployed Server
+
+**To access the Deployed Server:**
+1. Go to [http://16.171.250.3:8000](http://16.171.250.3:8000) to visit the running API.
+3. Go to [http://16.171.250.3](http://16.171.250.3) to visit and use the frontend GUI.
+
+You can use `ctrl-c` to stop the server.
+
 
 ## Feature 6
 

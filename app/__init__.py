@@ -11,6 +11,7 @@ from app.swagger_ui import render_swagger_ui
 
 from http import HTTPStatus
 from flask import Flask, request
+from flask_cors import CORS
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended.exceptions import NoAuthorizationError
@@ -20,6 +21,7 @@ def create_app():
     from app.config import Config
 
     app = Flask(__name__)
+    CORS(app)
     app.config.from_object(Config)
 
     DB.init_app(app)
