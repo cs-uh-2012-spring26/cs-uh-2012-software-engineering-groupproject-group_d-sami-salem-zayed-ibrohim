@@ -40,6 +40,7 @@ for more info specific to testing Flask applications)
 - Trainer-specific features (view class rosters)
 - Email Reminder Feature
 - User-level notification preferences for email and Telegram reminders
+- Bonus frontend GUI added
 
 # Running Locally
 
@@ -87,6 +88,7 @@ Run:
 
 1. Run `make run_local_server` to run the server. This will also run the tests first.
 2. Go to [http://127.0.0.1:8000](http://127.0.0.1:8000) to see it running!
+3. Go to [http://127.0.0.1](http://127.0.0.1) to use the frontend GUI.
 
 You can use `ctrl-c` to stop the server.
 
@@ -97,6 +99,21 @@ You can use `ctrl-c` to stop the server.
 Run `make tests` to execute the test suite and see the coverage report
 in your terminal. You can also see a visual report by viewing
 [/htmlcov/index.html](/htmlcov/index.html) in your browser.
+
+
+## Bonus Frontend
+
+This project includes a decoupled frontend GUI served via Nginx. The frontend provides a complete proof-of-concept for:
+
+- **Authentication:** Secure login/logout and member registration.
+- **Event Management:** Trainers can create classes with location and capacity details.
+- **RSVP System:** Members can view available spots and book classes.
+- **Live Updates:** All UI actions trigger direct calls to the backend API.
+
+**Access Links:**
+- **Local URL:** [http://127.0.0.1](http://127.0.0.1)
+- **Public VM URL:** `http://<vm-public-host>` (replace `<vm-public-host>` with the deployed VM host once deployment is confirmed)
+
 
 ## Feature 6
 
